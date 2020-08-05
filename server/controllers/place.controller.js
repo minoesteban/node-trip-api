@@ -4,33 +4,9 @@ const Rating = require('../models').Rating;
 
 module.exports = {
     create(req, res) {
-        var point = req.body.coordinates ? {
-                type: 'Point',
-                coordinates: [
-                    req.body.coordinates.latitude,
-                    req.body.coordinates.longitude,
-                ],
-            } :
-            null;
-        return Place.create({
-                tripId: req.params.tripId,
-                name: req.body.name,
-                googlePlaceId: req.body.googlePlaceId,
-                coordinates: point,
-                audioUrl: req.body.audioUrl,
-                audioPreviewUrl: req.body.audioPreviewUrl,
-                pictureUrl1: req.body.pictureUrl1,
-                pictureUrl2: req.body.pictureUrl2,
-                price: req.body.price,
-                order: req.body.order,
-                about: req.body.about,
-            })
-            .then((item) =>
-                res.status(200).send({
-                    success: true,
-                    message: 'Place successfully created.',
-                    item,
-                })
+        return Place.create(req.body)
+            .then((place) =>
+                res.status(200).send({ place })
             )
             .catch((error) => res.status(400).send(error));
     },
@@ -38,69 +14,31 @@ module.exports = {
     delete(req, res) {
         return Place.destroy({ where: { id: req.params.id, tripId: req.params.tripId } }).then((item) => {
             if (item > 0)
-                _success = true
+                res.status(200).send({ item });
             else
-                _success = false
+                res.status(400).send({ result: `no place found with id ${req.params.id}` });
 
-            res.status(200).send({
-                success: _success,
-                message: 'ok',
-                item,
-            });
         }).catch((error) => res.status(400).send(error));
     },
 
     update(req, res) {
-        var point = req.body.coordinates ? {
-                type: 'Point',
-                coordinates: [
-                    req.body.coordinates.latitude,
-                    req.body.coordinates.longitude,
-                ],
-            } :
-            null;
-        return Place.update({
-            name: req.body.name,
-            googlePlaceId: req.body.googlePlaceId,
-            coordinates: point,
-            audioUrl: req.body.audioUrl,
-            audioPreviewUrl: req.body.audioPreviewUrl,
-            pictureUrl1: req.body.pictureUrl1,
-            pictureUrl2: req.body.pictureUrl2,
-            price: req.body.price,
-            order: req.body.order,
-            about: req.body.about,
-        }, {
-            where: { id: req.params.id, tripId: req.params.tripId }
-        }).then((item) => {
-            if (item > 0)
-                Place.findOne({
-                    where: { id: req.params.id },
-                    include: { Rating },
-                }).then((place) => {
-                    res.status(200).send({
-                        success: true,
-                        message: 'ok',
-                        place,
+        return Place.update(req.body, { where: { id: req.params.id, tripId: req.params.tripId } })
+            .then((item) => {
+                if (item > 0)
+                    Place.findOne({
+                        where: { id: req.params.id }
+                    }).then((place) => {
+                        res.status(200).send({ place });
                     });
-                });
-            else
-                res.status(200).send({
-                    success: false,
-                    message: 'No place updated',
-                    item,
-                })
-        }).catch((error) => res.status(400).send(error));
+                else
+                    res.status(400).send({ result: `no place found with id ${req.params.id}` });
+            }).catch((error) => res.status(400).send(error));
     },
 
     getAll(_, res) {
         return Place.findAll({ include: [{ model: Trip }, { model: Rating }] })
             .then((places) => {
-                res.status(200).send({
-                    success: true,
-                    message: 'ok',
-                    places,
-                });
+                res.status(200).send({ places });
             })
             .catch((error) => res.status(400).send(error));
     },
@@ -111,11 +49,7 @@ module.exports = {
                 include: [{ model: Trip }, { model: Rating }],
             })
             .then((place) => {
-                res.status(200).send({
-                    success: true,
-                    message: 'ok',
-                    place,
-                });
+                res.status(200).send({ place });
             })
             .catch((error) => res.status(400).send(error));
     },
@@ -123,11 +57,7 @@ module.exports = {
     getByTripId(req, res) {
         return Place.findAll({ where: { tripId: req.params.tripId } })
             .then((places) => {
-                res.status(200).send({
-                    success: true,
-                    message: 'ok',
-                    places,
-                });
+                res.status(200).send({ places });
             })
             .catch((error) => res.status(400).send(error));
     },

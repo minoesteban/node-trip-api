@@ -1,0 +1,111 @@
+service: candidate-api
+
+plugins:
+  - serverless-offline
+  # - serverless-pseudo-parameters
+  # - serverless-plugin-split-stacks
+  # - serverless-prune-plugin
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  # memorySize: 256
+  # timeout: 30 # no se puede poner más que esto, API Gateway tiene como restricción 30seg de timeout
+  role: ${self:custom.env.IAM_ROLE} #arn:aws:iam::927751790626:role/lambda-dev-app-role
+
+  vpc:
+    securityGroupIds:
+      { 'Fn::Split': [',', '${self:custom.env.DB_SECURITY_GROUP}'] }
+    subnetIds: { 'Fn::Split': [',', '${self:custom.env.DB_SUBNETS}'] }
+
+  environment:
+    LOGLEVEL: ${self:custom.env.LOGLEVEL}
+    APP_VERSION: ${self:custom.version}
+    HOST: ${self:custom.env.HOST}
+    PORT: ${self:custom.env.PORT}
+    DB: ${self:custom.env.DB}
+    USER: ${self:custom.env.USER}
+    PASSWORD: ${self:custom.env.PASSWORD}
+    TOKEN_TIME_SET: ${self:custom.env.TOKEN_TIME_SET}
+    SECRET_PASSWORD_TOKEN: ${self:custom.env.SECRET_PASSWORD_TOKEN}
+
+package:
+  include:
+    - node_modules/**
+    - app/**
+  exclude:
+    - serverless_ymls/**
+    - apidoc/**
+    - test/**
+
+custom:
+  stage: ${opt:stage, 'dev'}
+  version: '1.0'
+
+  prune:
+    automatic: true
+    number: 3
+
+  env:
+    LOGLEVEL: ${self:custom.env.${self:custom.stage}.LOGLEVEL, self:custom.env.default.LOGLEVEL}
+    APP_VERSION: ${self:custom.version}
+    DB_SECURITY_GROUP: ${self:custom.env.${self:custom.stage}.DB_SECURITY_GROUP, self:custom.env.default.DB_SECURITY_GROUP}
+    DB_SUBNETS: ${self:custom.env.${self:custom.stage}.DB_SUBNETS, self:custom.env.default.DB_SUBNETS}
+    VPC_ID: ${self:custom.env.${self:custom.stage}.VPC_ID, self:custom.env.default.VPC_ID}
+    IAM_ROLE: ${self:custom.env.${self:custom.stage}.IAM_ROLE, self:custom.env.default.IAM_ROLE}
+    TOKEN_TIME_SET: ${self:custom.env.${self:custom.stage}.TOKEN_TIME_SET, self:custom.env.default.TOKEN_TIME_SET}
+    SECRET_PASSWORD_TOKEN: ${self:custom.env.${self:custom.stage}.SECRET_PASSWORD_TOKEN, self:custom.env.default.SECRET_PASSWORD_TOKEN}
+    HOST: ${self:custom.env.${self:custom.stage}.HOST, self:custom.env.default.HOST}
+    PORT: ${self:custom.env.${self:custom.stage}.PORT, self:custom.env.default.PORT}
+    DB: ${self:custom.env.${self:custom.stage}.DB, self:custom.env.default.DB}
+    USER: ${self:custom.env.${self:custom.stage}.USER, self:custom.env.default.USER}
+    PASSWORD: ${self:custom.env.${self:custom.stage}.PASSWORD, self:custom.env.default.PASSWORD}
+    S3_BUCKET: ${self:custom.env.${self:custom.stage}.S3_BUCKET, self:custom.env.default.S3_BUCKET}
+    STORAGE_DOMAIN: ${self:custom.env.${self:custom.stage}.STORAGE_DOMAIN, self:custom.env.default.STORAGE_DOMAIN}
+
+    default:
+      LOGLEVEL: 'WARN'
+      APP_VERSION: ${self:custom.version}
+      DB_SECURITY_GROUP: ${ssm:/api/${self:custom.stage}/security/vpc/sg/lambda}
+      DB_SUBNETS: ${ssm:/api/${self:custom.stage}/security/vpc/subnets/private}
+      VPC_ID: ${ssm:/api/${self:custom.stage}/security/vpc/id}
+      IAM_ROLE: ${ssm:/api/${self:custom.stage}/security/iam/role}
+      TOKEN_TIME_SET: ${ssm:/api/${self:custom.stage}/security/token_time_set}
+      SECRET_PASSWORD_TOKEN: ${ssm:/api/${self:custom.stage}/security/secret_password_token}
+      HOST: ${ssm:/api/${self:custom.stage}/database/aws/host}
+      PORT: ${ssm:/api/${self:custom.stage}/database/port}
+      DB: ${ssm:/api/${self:custom.stage}/database/db}
+      USER: ${ssm:/api/${self:custom.stage}/database/username}
+      PASSWORD: ${ssm:/api/${self:custom.stage}/database/password~true}
+      S3_BUCKET: ${ssm:/api/${self:custom.stage}/storage/bucket}
+      STORAGE_DOMAIN: ${ssm:/api/${self:custom.stage}/storage/domain}
+
+functions:
+  personalData:
+    handler: app/entities/personal_data/handler/personal_data.handler
+    description: 'Lambda PersonalData handler'
+    events:
+      - http:
+          path: /api/${self:custom.version}/personal_data
+          method: GET
+          cors: true
+      - http:
+          path: /api/${self:custom.version}/personal_data
+          method: POST
+          cors: true
+      - http:
+          path: /api/${self:custom.version}/personal_data/{CanCod}
+          method: GET
+          cors: true
+      - http:
+          path: /api/${self:custom.version}/personal_data/{CanCod}
+          method: PUT
+          cors: true
+      - http:
+          path: /api/${self:custom.version}/personal_data/{CanCod}
+          method: DELETE
+          cors: true
+      - http:
+          path: /api/${self:custom.version}/personal_data/full/{CanCod}
+          method: GET
+          cors: true

@@ -4,27 +4,12 @@ const Rating = require('../models').Rating;
 
 module.exports = {
     create(req, res) {
-        return Trip.create(
-                req.body
-                // {
-                //     name: req.body.name,
-                //     ownerId: req.body.ownerId,
-                //     googlePlaceId: req.body.googlePlaceId,
-                //     countryId: req.body.countryId,
-                //     previewAudioUrl: req.body.previewAudioUrl,
-                //     languageNameId: req.body.languageNameId,
-                //     languageFlagId: req.body.languageFlagId,
-                //     price: req.body.price,
-                //     about: req.body.about,
-                //     pictureUrl: req.body.pictureUrl,
-                // }
-                , { include: Place })
-            .then((item) =>
-                res.status(200).send({
-                    success: true,
-                    message: 'Trip successfully created.',
-                    item,
-                })
+        console.log('create');
+        console.log(JSON.stringify(req.body));
+
+        return Trip.create(req.body, { include: [{ model: Place }] })
+            .then((trip) =>
+                res.status(200).send({ trip })
             )
             .catch((error) => res.status(400).send(error));
     },
@@ -32,66 +17,36 @@ module.exports = {
     delete(req, res) {
         return Trip.destroy({ where: { id: req.params.id } }).then((item) => {
             if (item > 0)
-                _success = true
+                res.status(200).send({ item });
             else
-                _success = false
+                res.status(400).send({ result: `no trip found with id ${req.params.id}` });
 
-            _sendSuccess(res, {
-                success: _success,
-                message: 'ok',
-                item,
-            });
-        }).catch((error) => _sendError(res, error));
+        }).catch((error) => res.status(400).send(error));
     },
 
     update(req, res) {
-        return Trip.update(
-            req.body
-            //     {
-            //     name: req.body.name,
-            //     ownerId: req.body.ownerId,
-            //     googlePlaceId: req.body.googlePlaceId,
-            //     countryId: req.body.countryId,
-            //     previewAudioUrl: req.body.previewAudioUrl,
-            //     languageNameId: req.body.languageNameId,
-            //     languageFlagId: req.body.languageFlagId,
-            //     price: req.body.price,
-            //     about: req.body.about,
-            //     pictureUrl: req.body.pictureUrl,
-            //     submitted: req.body.submitted,
-            //     published: req.body.published,
-            // }
-            , {
-                where: { id: req.params.id }
-            }).then((item) => {
+        console.log('udpate');
+        console.log(JSON.stringify(req.body));
+        return Trip.update(req.body, {
+            where: { id: req.params.id }
+        }).then((item) => {
             if (item > 0)
                 Trip.findOne({
                     where: { id: req.params.id },
                     include: { model: Place, include: Rating },
                 }).then((trip) => {
-                    res.status(200).send({
-                        success: true,
-                        message: 'ok',
-                        trip,
-                    });
+                    res.status(200).send({ trip });
                 });
             else
-                res.status(200).send({
-                    success: false,
-                    message: 'No place updated',
-                    item,
-                });
+                res.status(400).send({ result: `no trip found with id ${req.params.id}` });
+
         }).catch((error) => res.status(400).send(error));
     },
 
     getAll(_, res) {
         return Trip.findAll({ include: { model: Place, include: Rating } })
             .then((trips) => {
-                res.status(200).send({
-                    success: true,
-                    message: 'ok',
-                    trips,
-                });
+                res.status(200).send({ trips });
             })
             .catch((error) => res.status(400).send(error));
     },
@@ -102,11 +57,7 @@ module.exports = {
                 include: { model: Place, include: Rating },
             })
             .then((trip) => {
-                res.status(200).send({
-                    success: true,
-                    message: 'ok',
-                    trip,
-                });
+                res.status(200).send({ trip });
             })
             .catch((error) => res.status(400).send(error));
     },
@@ -117,11 +68,7 @@ module.exports = {
                 include: { model: Place, include: Rating },
             })
             .then((trips) => {
-                res.status(200).send({
-                    success: true,
-                    message: 'ok',
-                    trips,
-                });
+                res.status(200).send({ trips });
             })
             .catch((error) => res.status(400).send(error));
     },
