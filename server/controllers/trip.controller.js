@@ -8,39 +8,42 @@ module.exports = {
         console.log(JSON.stringify(req.body));
 
         return Trip.create(req.body, { include: [{ model: Place }] })
-            .then((trip) =>
-                res.status(200).send({ trip })
-            )
+            .then((trip) => res.status(200).send({ trip }))
             .catch((error) => res.status(400).send(error));
     },
 
     delete(req, res) {
-        return Trip.destroy({ where: { id: req.params.id } }).then((item) => {
-            if (item > 0)
-                res.status(200).send({ item });
-            else
-                res.status(400).send({ result: `no trip found with id ${req.params.id}` });
-
-        }).catch((error) => res.status(400).send(error));
+        return Trip.destroy({ where: { id: req.params.id } })
+            .then((item) => {
+                if (item > 0) res.status(200).send({ item });
+                else
+                    res
+                    .status(400)
+                    .send({ result: `no trip found with id ${req.params.id}` });
+            })
+            .catch((error) => res.status(400).send(error));
     },
 
     update(req, res) {
         console.log('udpate');
         console.log(JSON.stringify(req.body));
         return Trip.update(req.body, {
-            where: { id: req.params.id }
-        }).then((item) => {
-            if (item > 0)
-                Trip.findOne({
-                    where: { id: req.params.id },
-                    include: { model: Place, include: Rating },
-                }).then((trip) => {
-                    res.status(200).send({ trip });
-                });
-            else
-                res.status(400).send({ result: `no trip found with id ${req.params.id}` });
-
-        }).catch((error) => res.status(400).send(error));
+                where: { id: req.params.id },
+            })
+            .then((item) => {
+                if (item > 0)
+                    Trip.findOne({
+                        where: { id: req.params.id },
+                        include: { model: Place, include: Rating },
+                    }).then((trip) => {
+                        res.status(200).send({ trip });
+                    });
+                else
+                    res
+                    .status(400)
+                    .send({ result: `no trip found with id ${req.params.id}` });
+            })
+            .catch((error) => res.status(400).send(error));
     },
 
     getAll(_, res) {

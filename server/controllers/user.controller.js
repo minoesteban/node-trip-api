@@ -1,4 +1,4 @@
-const User = require('../models').User;
+const User = require('../models/index').User;
 
 module.exports = {
     create(req, res) {
@@ -9,9 +9,7 @@ module.exports = {
                 lastName: req.body.lastName,
                 about: req.body.about,
             })
-            .then((item) =>
-                res.status(200).send({ item })
-            )
+            .then((item) => res.status(200).send({ item }))
             .catch((error) => res.status(400).send(error));
     },
 
@@ -34,9 +32,7 @@ module.exports = {
                 downloadedTrips: req.body.downloadedTrips,
                 downloadedPlaces: req.body.downloadedPlaces,
             }, { where: { id: req.params.id }, returning: true })
-            .then((item) =>
-                res.status(200).send({ item })
-            )
+            .then((item) => res.status(200).send({ item }))
             .catch((error) => res.status(400).send(error));
     },
 

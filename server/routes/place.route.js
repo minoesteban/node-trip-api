@@ -2,16 +2,16 @@ const place = require('../controllers').place;
 const validator = require('../validators/place.validator');
 const router = require('express').Router();
 
-router.post('/:tripId/place', place.create);
+router.post('/:tripId/places', place.create);
 
-router.get('/place/all', place.getAll);
+router.get('/places/all', place.getAll);
 
-router.get('/:tripId/place/:id', validator.getById, place.getById);
+router.get('/:tripId/places/:id', validator.getById, place.getById);
 
-router.patch('/:tripId/place/:id', validator.update, place.update);
+router.patch('/:tripId/places/:id', validator.update, place.update);
 
-router.delete('/:tripId/place/:id', validator.delete, place.delete);
+router.delete('/:tripId/places/:id', validator.delete, place.delete);
 
-router.get('/:tripId/place', validator.getByTripId, place.getByTripId);
+router.get('/:tripId/places', validator.getByTripId, place.getByTripId);
 
 module.exports = router;

@@ -11,22 +11,22 @@ module.exports = (sequelize, DataTypes) => {
         static associate(models) {
             // define association here
             this.trip = this.belongsTo(models.Trip, {
-                foreignKey: 'trip_id'
+                foreignKey: 'trip_id',
             });
             this.user = this.belongsTo(models.User, {
-                foreignKey: 'user_id'
+                foreignKey: 'user_id',
             });
             this.place = this.belongsTo(models.Place, {
-                foreignKey: 'place_id'
+                foreignKey: 'place_id',
             });
         }
-    };
+    }
     Purchase.init({
         id: {
             type: Sequelize.INTEGER,
             field: 'id',
-            primaryKey: true
-                //es autoincrement en PSQL. no insertar
+            primaryKey: true,
+            //es autoincrement en PSQL. no insertar
         },
         tripId: {
             type: Sequelize.INTEGER,
@@ -34,8 +34,8 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             references: {
                 model: 'Trip',
-                key: 'id'
-            }
+                key: 'id',
+            },
         },
         placeId: {
             type: Sequelize.INTEGER,
@@ -43,8 +43,8 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             references: {
                 model: 'Place',
-                key: 'id'
-            }
+                key: 'id',
+            },
         },
         userId: {
             type: Sequelize.INTEGER,
@@ -52,9 +52,9 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             references: {
                 model: 'User',
-                key: 'id'
-            }
-        }
+                key: 'id',
+            },
+        },
     }, {
         sequelize,
         schema: 'public',
