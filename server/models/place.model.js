@@ -42,24 +42,19 @@ module.exports = (sequelize, DataTypes) => {
             field: 'coordinates',
             allowNull: true,
         },
-        audioUrl: {
+        fullAudioUrl: {
             type: Sequelize.STRING,
-            field: 'audio_url',
+            field: 'full_audio_url',
             allowNull: true,
         },
-        audioPreviewUrl: {
+        previewAudioUrl: {
             type: Sequelize.STRING,
-            field: 'audio_preview_url',
+            field: 'preview_audio_url',
             allowNull: true,
         },
-        pictureUrl1: {
+        imageUrl: {
             type: Sequelize.STRING,
-            field: 'picture_url_1',
-            allowNull: true,
-        },
-        pictureUrl2: {
-            type: Sequelize.STRING,
-            field: 'picture_url_2',
+            field: 'image_url',
             allowNull: true,
         },
         price: {

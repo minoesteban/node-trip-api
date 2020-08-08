@@ -12,6 +12,8 @@ router.get('/owner/:ownerId', validator.getByOwnerId, trip.getByOwnerId);
 
 router.patch('/:id', validator.update, trip.update);
 
+router.put('/:id/audios', trip.uploadAudio);
+
 router.delete('/:id', validator.delete, trip.delete);
 
 module.exports = router;

@@ -11,7 +11,7 @@ provider:
   runtime: nodejs12.x
   # memorySize: 256
   # timeout: 30 # no se puede poner más que esto, API Gateway tiene como restricción 30seg de timeout
-  # role: ${self:custom.env.IAM_ROLE} #arn:aws:iam::927751790626:role/lambda-dev-app-role
+  role: ${self:custom.env.IAM_ROLE} #arn:aws:iam::454213127160:role/trip-api-lambda
 
   # vpc:
   #   securityGroupIds:
@@ -25,6 +25,8 @@ provider:
     DB: ${self:custom.env.DB}
     USER: ${self:custom.env.USER}
     PASSWORD: ${self:custom.env.PASSWORD}
+    AUDIO_FOLDER: ${self:custom.env.AUDIO_FOLDER}
+    IMAGE_FOLDER: ${self:custom.env.IMAGE_FOLDER}
     # LOGLEVEL: ${self:custom.env.LOGLEVEL}
     # TOKEN_TIME_SET: ${self:custom.env.TOKEN_TIME_SET}
     # SECRET_PASSWORD_TOKEN: ${self:custom.env.SECRET_PASSWORD_TOKEN}
@@ -53,15 +55,17 @@ custom:
     DB: ${self:custom.env.${self:custom.stage}.DB, self:custom.env.default.DB}
     USER: ${self:custom.env.${self:custom.stage}.USER, self:custom.env.default.USER}
     PASSWORD: ${self:custom.env.${self:custom.stage}.PASSWORD, self:custom.env.default.PASSWORD}
+    S3_BUCKET: ${self:custom.env.${self:custom.stage}.S3_BUCKET, self:custom.env.default.S3_BUCKET}
+    STORAGE_DOMAIN: ${self:custom.env.${self:custom.stage}.STORAGE_DOMAIN, self:custom.env.default.STORAGE_DOMAIN}
+    IAM_ROLE: ${self:custom.env.${self:custom.stage}.IAM_ROLE, self:custom.env.default.IAM_ROLE}
+    AUDIO_FOLDER: ${self:custom.env.${self:custom.stage}.AUDIO_FOLDER, self:custom.env.default.AUDIO_FOLDER}
+    IMAGE_FOLDER: ${self:custom.env.${self:custom.stage}.IMAGE_FOLDER, self:custom.env.default.IMAGE_FOLDER}
     # LOGLEVEL: ${self:custom.env.${self:custom.stage}.LOGLEVEL, self:custom.env.default.LOGLEVEL}
     # DB_SECURITY_GROUP: ${self:custom.env.${self:custom.stage}.DB_SECURITY_GROUP, self:custom.env.default.DB_SECURITY_GROUP}
     # DB_SUBNETS: ${self:custom.env.${self:custom.stage}.DB_SUBNETS, self:custom.env.default.DB_SUBNETS}
     # VPC_ID: ${self:custom.env.${self:custom.stage}.VPC_ID, self:custom.env.default.VPC_ID}
-    # IAM_ROLE: ${self:custom.env.${self:custom.stage}.IAM_ROLE, self:custom.env.default.IAM_ROLE}
     # TOKEN_TIME_SET: ${self:custom.env.${self:custom.stage}.TOKEN_TIME_SET, self:custom.env.default.TOKEN_TIME_SET}
     # SECRET_PASSWORD_TOKEN: ${self:custom.env.${self:custom.stage}.SECRET_PASSWORD_TOKEN, self:custom.env.default.SECRET_PASSWORD_TOKEN}
-    # S3_BUCKET: ${self:custom.env.${self:custom.stage}.S3_BUCKET, self:custom.env.default.S3_BUCKET}
-    # STORAGE_DOMAIN: ${self:custom.env.${self:custom.stage}.STORAGE_DOMAIN, self:custom.env.default.STORAGE_DOMAIN}
 
     default:
       APP_VERSION: ${self:custom.version}
@@ -70,15 +74,17 @@ custom:
       DB: ${ssm:/api/${self:custom.stage}/db/name}
       USER: ${ssm:/api/${self:custom.stage}/db/username}
       PASSWORD: ${ssm:/api/${self:custom.stage}/db/password~true}
+      STORAGE_DOMAIN: ${ssm:/api/${self:custom.stage}/storage/domain}
+      S3_BUCKET: ${ssm:/api/${self:custom.stage}/storage/name}
+      AUDIO_FOLDER: 'audios'
+      IMAGE_FOLDER: 'images'
+      IAM_ROLE: ${ssm:/api/${self:custom.stage}/security/iam-role}
       # LOGLEVEL: 'WARN'
       # DB_SECURITY_GROUP: ${ssm:/api/${self:custom.stage}/security/vpc/sg/lambda}
       # DB_SUBNETS: ${ssm:/api/${self:custom.stage}/security/vpc/subnets/private}
       # VPC_ID: ${ssm:/api/${self:custom.stage}/security/vpc/id}
-      # IAM_ROLE: ${ssm:/api/${self:custom.stage}/security/iam/role}
       # TOKEN_TIME_SET: ${ssm:/api/${self:custom.stage}/security/token_time_set}
       # SECRET_PASSWORD_TOKEN: ${ssm:/api/${self:custom.stage}/security/secret_password_token}
-      # S3_BUCKET: ${ssm:/api/${self:custom.stage}/storage/bucket}
-      # STORAGE_DOMAIN: ${ssm:/api/${self:custom.stage}/storage/domain}
 
 functions:
   user:
@@ -108,6 +114,9 @@ functions:
   trip:
     handler: server/handlers/trip.handler
     description: 'Lambda Trips handler'
+    environment:
+      S3_BUCKET: ${self:custom.env.S3_BUCKET}
+      STORAGE_DOMAIN: ${self:custom.env.STORAGE_DOMAIN}
     events:
       - http:
           path: /api/${self:custom.version}/trips
@@ -124,6 +133,10 @@ functions:
       - http:
           path: /api/${self:custom.version}/trips/{tripId}
           method: PATCH
+          cors: true
+      - http:
+          path: /api/${self:custom.version}/trips/{tripId}/audios
+          method: PUT
           cors: true
       - http:
           path: /api/${self:custom.version}/trips/{tripId}

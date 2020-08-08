@@ -97,9 +97,9 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: false,
             allowNull: false,
         },
-        pictureUrl: {
+        imageUrl: {
             type: Sequelize.STRING,
-            field: 'picture_url',
+            field: 'image_url',
             allowNull: true,
         },
     }, {
