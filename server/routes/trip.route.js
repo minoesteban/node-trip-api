@@ -8,11 +8,9 @@ router.get('/all', trip.getAll);
 
 router.get('/:id', validator.getById, trip.getById);
 
-router.get('/owner/:ownerId', validator.getByOwnerId, trip.getByOwnerId);
-
 router.patch('/:id', validator.update, trip.update);
 
-router.put('/:id/audios', trip.uploadAudio);
+router.put('/:id/files', validator.getSignedUrlPut, trip.getSignedUrlPut);
 
 router.delete('/:id', validator.delete, trip.delete);
 

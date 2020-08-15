@@ -2,7 +2,8 @@ const Place = require('../models').Place;
 const Trip = require('../models').Trip;
 const Rating = require('../models').Rating;
 const AWS = require('aws-sdk');
-const s3 = new AWS.S3();
+const s3 = new AWS.S3({ signatureVersion: 'v4' });
+const uuid = require('uuid');
 
 module.exports = {
     create(req, res) {
@@ -71,90 +72,130 @@ module.exports = {
             .catch((error) => res.status(400).send(error));
     },
 
-    uploadPreviewAudio(req, res) {
-        let data = Buffer.from(req.body.file, 'base64');
+    getSignedUrlPut(req, res) {
+        let extension = req.query.type.toLowerCase().trim();
+        let isFullAudio = req.query.isFull;
+        console.log(`ifFullAudio ${isFullAudio}`);
+        let fileType = extension.replace('jpg', 'jpeg');
+        let contentType = '';
+        let key = '';
+        let audio_types = process.env.AUDIO_TYPES.split(',');
+        let image_types = process.env.IMAGE_TYPES.split(',');
+        if (image_types.indexOf(extension) > 0) {
+            contentType = `image/${fileType}`;
+            key = `trips/${req.params.tripId}/${process.env.IMAGE_FOLDER}/places/${
+        req.params.id
+      }/${uuid.v4()}.${extension}`;
+        }
+
+        if (audio_types.indexOf(extension) > 0) {
+            contentType = `audio/${fileType}`;
+            key = `trips/${req.params.tripId}/${process.env.AUDIO_FOLDER}/places/${
+        req.params.id
+      }/${uuid.v4()}.${extension}`;
+        }
+
         let params = {
             Bucket: process.env.S3_BUCKET,
-            Key: `trip-${req.params.tripId}/${process.env.AUDIO_FOLDER}/place-${req.params.id}-preview.${req.body.extension}`,
-            Body: data,
+            Key: key,
+            Expires: 60 * 60,
+            ContentType: contentType,
+            // ACL: 'public-read',
         };
-        s3.upload(params)
-            .promise()
-            .then((data) => {
-                data.key;
-                Place.update({ previewAudioUrl: data.key }, {
-                        where: { id: req.params.id },
-                    })
-                    .then((item) => {
-                        if (item > 0)
-                            Place.findOne({ where: { id: req.params.id } }).then((place) => {
-                                res.status(200).send({ place });
-                            });
-                        else
-                            res
-                            .status(400)
-                            .send({ result: `no place found with id ${req.params.id}` });
-                    })
-                    .catch((error) => res.status(400).send(error));
+        s3.getSignedUrlPromise('putObject', params)
+            .then((uploadUrl) => {
+                res.status(200).send({
+                    uploadUrl,
+                    downloadUrl: `${process.env.S3_URL}${params.Key}`,
+                });
             })
             .catch((error) => res.status(400).send(error));
     },
 
-    uploadFullAudio(req, res) {
-        let data = Buffer.from(req.body.file, 'base64');
-        let params = {
-            Bucket: process.env.S3_BUCKET,
-            Key: `trip-${req.params.tripId}/${process.env.AUDIO_FOLDER}/place-${req.params.id}-full.${req.body.extension}`,
-            Body: data,
-        };
-        s3.upload(params)
-            .promise()
-            .then((data) => {
-                data.key;
-                Place.update({ fullAudioUrl: data.key }, {
-                        where: { id: req.params.id },
-                    })
-                    .then((item) => {
-                        if (item > 0)
-                            Place.findOne({ where: { id: req.params.id } }).then((place) => {
-                                res.status(200).send({ place });
-                            });
-                        else
-                            res
-                            .status(400)
-                            .send({ result: `no place found with id ${req.params.id}` });
-                    })
-                    .catch((error) => res.status(400).send(error));
-            })
-            .catch((error) => res.status(400).send(error));
-    },
+    // uploadPreviewAudio(req, res) {
+    //     let data = Buffer.from(req.body.file, 'base64');
+    //     let params = {
+    //         Bucket: process.env.S3_BUCKET,
+    //         Key: `trip-${req.params.tripId}/${process.env.AUDIO_FOLDER}/place-${req.params.id}-preview.${req.body.extension}`,
+    //         Body: data,
+    //     };
+    //     s3.upload(params)
+    //         .promise()
+    //         .then((data) => {
+    //             data.key;
+    //             Place.update({ previewAudioUrl: data.key }, {
+    //                     where: { id: req.params.id },
+    //                 })
+    //                 .then((item) => {
+    //                     if (item > 0)
+    //                         Place.findOne({ where: { id: req.params.id } }).then((place) => {
+    //                             res.status(200).send({ place });
+    //                         });
+    //                     else
+    //                         res
+    //                         .status(400)
+    //                         .send({ result: `no place found with id ${req.params.id}` });
+    //                 })
+    //                 .catch((error) => res.status(400).send(error));
+    //         })
+    //         .catch((error) => res.status(400).send(error));
+    // },
 
-    uploadImage(req, res) {
-        let data = Buffer.from(req.body.file, 'base64');
-        let params = {
-            Bucket: process.env.S3_BUCKET,
-            Key: `trip-${req.params.id}/${process.env.IMAGE_FOLDER}/place-${req.params.id}.${req.body.extension}`,
-            Body: data,
-        };
-        s3.upload(params)
-            .promise()
-            .then((data) => {
-                data.key;
-                Place.update({ imageUrl: data.key }, {
-                        where: { id: req.params.id },
-                    })
-                    .then((item) => {
-                        if (item > 0)
-                            Place.findOne({ where: { id: req.params.id } }).then((place) => {
-                                res.status(200).send({ place });
-                            });
-                        else
-                            res
-                            .status(400)
-                            .send({ result: `no place found with id ${req.params.id}` });
-                    })
-                    .catch((error) => res.status(400).send(error));
-            })
-            .catch((error) => res.status(400).send(error));
-    },
+    // uploadFullAudio(req, res) {
+    //     let data = Buffer.from(req.body.file, 'base64');
+    //     let params = {
+    //         Bucket: process.env.S3_BUCKET,
+    //         Key: `trip-${req.params.tripId}/${process.env.AUDIO_FOLDER}/place-${req.params.id}-full.${req.body.extension}`,
+    //         Body: data,
+    //     };
+    //     s3.upload(params)
+    //         .promise()
+    //         .then((data) => {
+    //             data.key;
+    //             Place.update({ fullAudioUrl: data.key }, {
+    //                     where: { id: req.params.id },
+    //                 })
+    //                 .then((item) => {
+    //                     if (item > 0)
+    //                         Place.findOne({ where: { id: req.params.id } }).then((place) => {
+    //                             res.status(200).send({ place });
+    //                         });
+    //                     else
+    //                         res
+    //                         .status(400)
+    //                         .send({ result: `no place found with id ${req.params.id}` });
+    //                 })
+    //                 .catch((error) => res.status(400).send(error));
+    //         })
+    //         .catch((error) => res.status(400).send(error));
+    // },
+
+    // uploadImage(req, res) {
+    //     let data = Buffer.from(req.body.file, 'base64');
+    //     let params = {
+    //         Bucket: process.env.S3_BUCKET,
+    //         Key: `trip-${req.params.id}/${process.env.IMAGE_FOLDER}/place-${req.params.id}.${req.body.extension}`,
+    //         Body: data,
+    //     };
+    //     s3.upload(params)
+    //         .promise()
+    //         .then((data) => {
+    //             data.key;
+    //             Place.update({ imageUrl: data.key }, {
+    //                     where: { id: req.params.id },
+    //                 })
+    //                 .then((item) => {
+    //                     if (item > 0)
+    //                         Place.findOne({ where: { id: req.params.id } }).then((place) => {
+    //                             res.status(200).send({ place });
+    //                         });
+    //                     else
+    //                         res
+    //                         .status(400)
+    //                         .send({ result: `no place found with id ${req.params.id}` });
+    //                 })
+    //                 .catch((error) => res.status(400).send(error));
+    //         })
+    //         .catch((error) => res.status(400).send(error));
+    // },
 };

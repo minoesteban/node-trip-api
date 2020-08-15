@@ -14,4 +14,10 @@ router.delete('/:tripId/places/:id', validator.delete, place.delete);
 
 router.get('/:tripId/places', validator.getByTripId, place.getByTripId);
 
+router.put(
+    '/:tripId/places/:id/files',
+    validator.getSignedUrlPut,
+    place.getSignedUrlPut
+);
+
 module.exports = router;

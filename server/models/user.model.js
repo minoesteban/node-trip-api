@@ -45,6 +45,11 @@ module.exports = (sequelize, DataTypes) => {
             field: 'last_name',
             allowNull: true,
         },
+        imageUrl: {
+            type: Sequelize.STRING,
+            field: 'image_url',
+            allowNull: true,
+        },
         active: {
             type: Sequelize.BOOLEAN,
             field: 'active',

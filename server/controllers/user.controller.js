@@ -1,4 +1,8 @@
 const User = require('../models/index').User;
+const AWS = require('aws-sdk');
+const s3 = new AWS.S3({ signatureVersion: 'v4' });
+const uuid = require('uuid');
+const { response } = require('express');
 
 module.exports = {
     create(req, res) {
@@ -18,6 +22,7 @@ module.exports = {
                 firstName: req.body.firstName,
                 lastName: req.body.lastName,
                 about: req.body.about,
+                imageUrl: req.body.imageUrl,
                 languageId1: req.body.languageId1,
                 languageId2: req.body.languageId2,
                 languageId3: req.body.languageId3,
@@ -83,4 +88,50 @@ module.exports = {
             })
             .catch((error) => res.status(400).send(error));
     },
+    getSignedUrlPut(req, res) {
+        let fileType = req.query.type.toLowerCase().trim();
+        let params = {
+            Bucket: process.env.S3_BUCKET,
+            Key: `users/${req.params.id}/${
+        process.env.IMAGE_FOLDER
+      }/${uuid.v4()}.${fileType}`,
+            Expires: 60 * 60,
+            ContentType: `image/${fileType}`,
+            // ACL: 'public-read',
+        };
+
+        s3.getSignedUrlPromise('putObject', params)
+            .then((uploadUrl) => {
+                res.status(200).send({
+                    uploadUrl,
+                    downloadUrl: `${process.env.S3_URL}${params.Key}`,
+                });
+            })
+            .catch((error) => res.status(400).send(error));
+    },
+    // getImage(req, res) {
+    //     let key = '';
+    //     key = req.params.key;
+    //     let params = {
+    //         Bucket: process.env.S3_BUCKET,
+    //         Key: `users/images/${key}`,
+    //         ResponseContentType: `image/${key
+    //     .substring(key.indexOf('.'))
+    //     .replace('.', '')
+    //     .replace('jpg', 'jpeg')}`,
+    //     };
+    //     s3.getObject(params)
+    //         .promise()
+    //         .then((data) => {
+    //             res.writeHead(200, {
+    //                 'Content-Type': `image/${key
+    //         .substring(key.indexOf('.'))
+    //         .replace('.', '')
+    //         .replace('jpg', 'jpeg')}`,
+    //             });
+    //             res.end(Buffer.from(data.Body).toString('base64'));
+    //             // res.status(200).send(data.Body.toString('base64'));
+    //         })
+    //         .catch((error) => res.status(400).send(error));
+    // },
 };
