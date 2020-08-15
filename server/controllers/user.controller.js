@@ -88,6 +88,7 @@ module.exports = {
             })
             .catch((error) => res.status(400).send(error));
     },
+
     getSignedUrlPut(req, res) {
         let fileType = req.query.type.toLowerCase().trim();
         let params = {
@@ -109,29 +110,4 @@ module.exports = {
             })
             .catch((error) => res.status(400).send(error));
     },
-    // getImage(req, res) {
-    //     let key = '';
-    //     key = req.params.key;
-    //     let params = {
-    //         Bucket: process.env.S3_BUCKET,
-    //         Key: `users/images/${key}`,
-    //         ResponseContentType: `image/${key
-    //     .substring(key.indexOf('.'))
-    //     .replace('.', '')
-    //     .replace('jpg', 'jpeg')}`,
-    //     };
-    //     s3.getObject(params)
-    //         .promise()
-    //         .then((data) => {
-    //             res.writeHead(200, {
-    //                 'Content-Type': `image/${key
-    //         .substring(key.indexOf('.'))
-    //         .replace('.', '')
-    //         .replace('jpg', 'jpeg')}`,
-    //             });
-    //             res.end(Buffer.from(data.Body).toString('base64'));
-    //             // res.status(200).send(data.Body.toString('base64'));
-    //         })
-    //         .catch((error) => res.status(400).send(error));
-    // },
 };
