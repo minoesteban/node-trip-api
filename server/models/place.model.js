@@ -37,6 +37,11 @@ module.exports = (sequelize, DataTypes) => {
             field: 'google_place_id',
             allowNull: true,
         },
+        locationName: {
+            type: Sequelize.STRING,
+            field: 'location_name',
+            allowNull: true,
+        },
         coordinates: {
             type: Sequelize.GEOMETRY(),
             field: 'coordinates',

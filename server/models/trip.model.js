@@ -55,6 +55,11 @@ module.exports = (sequelize, DataTypes) => {
             field: 'google_place_id',
             allowNull: true,
         },
+        locationName: {
+            type: Sequelize.STRING,
+            field: 'location_name',
+            allowNull: true,
+        },
         countryId: {
             type: Sequelize.STRING(3),
             field: 'country_id',
