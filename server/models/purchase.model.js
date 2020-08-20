@@ -31,7 +31,7 @@ module.exports = (sequelize, DataTypes) => {
         tripId: {
             type: Sequelize.INTEGER,
             field: 'trip_id',
-            allowNull: false,
+            allowNull: true,
             references: {
                 model: 'Trip',
                 key: 'id',
@@ -40,7 +40,7 @@ module.exports = (sequelize, DataTypes) => {
         placeId: {
             type: Sequelize.INTEGER,
             field: 'place_id',
-            allowNull: false,
+            allowNull: true,
             references: {
                 model: 'Place',
                 key: 'id',

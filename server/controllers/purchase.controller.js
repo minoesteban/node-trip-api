@@ -1,4 +1,8 @@
+const { sequelize } = require('../models');
+const { Op } = require('sequelize');
 const Purchase = require('../models').Purchase;
+const Trip = require('../models').Trip;
+const Place = require('../models').Place;
 
 module.exports = {
     create(req, res) {
@@ -7,24 +11,48 @@ module.exports = {
                 userId: req.body.userId,
                 placeId: req.body.placeId,
             })
-            .then((item) =>
-                res.status(200).send({
-                    success: true,
-                    message: 'Purchase successfully created.',
-                    item,
-                })
-            )
+            .then((purchase) => res.status(200).send({ purchase }))
+            .catch((error) => res.status(400).send(error));
+    },
+
+    getCount(_, res) {
+        return Purchase.findAll({
+                attributes: [
+                    'tripId', [sequelize.fn('count', sequelize.col('id')), 'count'],
+                ],
+                group: 'trip_id',
+                order: ['tripId'],
+                where: {
+                    tripId: {
+                        [Op.gt]: 0,
+                    },
+                },
+            })
+            .then((trips) => {
+                Purchase.findAll({
+                        attributes: [
+                            'placeId', [sequelize.fn('count', sequelize.col('id')), 'count'],
+                        ],
+                        group: 'place_id',
+                        order: ['placeId'],
+                        where: {
+                            placeId: {
+                                [Op.gt]: 0,
+                            },
+                        },
+                    })
+                    .then((places) => {
+                        res.status(200).send({ trips, places });
+                    })
+                    .catch((error) => res.status(400).send(error));
+            })
             .catch((error) => res.status(400).send(error));
     },
 
     getAll(_, res) {
         return Purchase.findAll()
             .then((purchases) => {
-                res.status(200).send({
-                    success: true,
-                    message: 'ok',
-                    purchases,
-                });
+                res.status(200).send({ purchases });
             })
             .catch((error) => res.status(400).send(error));
     },
@@ -43,11 +71,7 @@ module.exports = {
 
         return Purchase.findAll({ where: filters })
             .then((purchases) => {
-                res.status(200).send({
-                    success: true,
-                    message: 'ok',
-                    purchases,
-                });
+                res.status(200).send({ purchases });
             })
             .catch((error) => res.status(400).send(error));
     },
@@ -55,11 +79,7 @@ module.exports = {
     getByUserId(req, res) {
         return Purchase.findAll({ where: { userId: req.params.userId } })
             .then((purchases) => {
-                res.status(200).send({
-                    success: true,
-                    message: 'ok',
-                    purchases,
-                });
+                res.status(200).send({ purchases });
             })
             .catch((error) => res.status(400).send(error));
     },
@@ -67,11 +87,7 @@ module.exports = {
     update(req, res) {
         return Purchase.update({ rating: req.body.rating }, { where: { id: req.params.id } })
             .then((purchase) => {
-                res.status(200).send({
-                    success: true,
-                    message: 'ok',
-                    purchases,
-                });
+                res.status(200).send({ purchase });
             })
             .catch((error) => res.status(400).send(error));
     },

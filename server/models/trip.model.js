@@ -22,6 +22,10 @@ module.exports = (sequelize, DataTypes) => {
                 onUpdate: 'CASCADE',
             });
 
+            this.places = this.hasMany(models.Purchase, {
+                foreignKey: 'trip_id',
+            });
+
             this.ratings = this.hasMany(models.Rating, {
                 foreignKey: 'trip_id',
             });

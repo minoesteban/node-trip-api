@@ -19,6 +19,10 @@ module.exports = (sequelize, DataTypes) => {
             this.ratings = this.hasMany(models.Rating, {
                 foreignKey: 'place_id',
             });
+
+            this.places = this.hasMany(models.Purchase, {
+                foreignKey: 'place_id',
+            });
         }
     }
     Place.init({

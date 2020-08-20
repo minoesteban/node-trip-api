@@ -6,6 +6,8 @@ router.post('/', purchase.create);
 
 router.get('/all', purchase.getAll);
 
+router.get('/count', purchase.getCount);
+
 router.get('/', validator.getBy, purchase.getBy);
 
 router.patch('/:id', validator.update, purchase.update);
