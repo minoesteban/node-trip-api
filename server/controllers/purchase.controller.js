@@ -1,8 +1,6 @@
 const { sequelize } = require('../models');
 const { Op } = require('sequelize');
 const Purchase = require('../models').Purchase;
-const Trip = require('../models').Trip;
-const Place = require('../models').Place;
 
 module.exports = {
     create(req, res) {

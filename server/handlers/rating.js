@@ -8,7 +8,7 @@ const app = express();
 app.use(bodyParser.json({ limit: '15MB', type: 'application/json' }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use('/api', (req, res, next) => {
+app.use('/api', (req, _, next) => {
     console.debug(`${req.method} ${req.path}`);
     next();
 });
