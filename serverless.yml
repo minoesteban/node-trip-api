@@ -1,7 +1,7 @@
 service: trip-api
 
 plugins:
-  #   - serverless-offline
+  # - serverless-offline
   # - serverless-pseudo-parameters
   # - serverless-plugin-split-stacks
   - serverless-prune-plugin
@@ -135,7 +135,7 @@ functions:
     description: 'Lambda Trips handler'
     events:
       - http:
-          path: /api/${self:custom.version}/trips
+          path: /api/${self:custom.version}/trips/{tripId}
           method: GET
           cors: true
       - http:

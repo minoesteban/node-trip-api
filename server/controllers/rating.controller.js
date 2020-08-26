@@ -1,5 +1,4 @@
 const { sequelize } = require('../models');
-
 const Rating = require('../models').Rating;
 
 module.exports = {

@@ -1,3 +1,4 @@
+const { sequelize } = require('../models');
 const Place = require('../models').Place;
 const Trip = require('../models').Trip;
 const Rating = require('../models').Rating;
@@ -7,9 +8,10 @@ const uuid = require('uuid');
 
 module.exports = {
     create(req, res) {
-        return Trip.create(req.body, { include: [{ model: Place }] })
-            .then((trip) => res.status(200).send({ trip }))
-            .catch((error) => res.status(400).send(error));
+        return sequelize.transaction(async(t) => {
+            await Trip.create(req.body, { include: [{ model: Place }], transaction: t })
+                .then((trip) => res.status(200).send({ trip }));
+        }).catch((error) => res.status(400).send(error));
     },
 
     delete(req, res) {
@@ -44,7 +46,15 @@ module.exports = {
     },
 
     getAll(_, res) {
-        return Trip.findAll({ include: { model: Place, include: Rating } })
+        return Trip.findAll({
+                include: {
+                    model: Place,
+                    include: {
+                        model: Rating,
+                        attributes: ['rating'],
+                    },
+                },
+            })
             .then((trips) => {
                 res.status(200).send({ trips });
             })
@@ -54,7 +64,13 @@ module.exports = {
     getById(req, res) {
         return Trip.findOne({
                 where: { id: req.params.id },
-                include: { model: Place, include: Rating },
+                include: {
+                    model: Place,
+                    include: {
+                        model: Rating,
+                        attributes: ['rating'],
+                    },
+                },
             })
             .then((trip) => {
                 res.status(200).send({ trip });
@@ -65,7 +81,13 @@ module.exports = {
     getByOwnerId(req, res) {
         return Trip.findAll({
                 where: { ownerId: req.params.ownerId },
-                include: { model: Place, include: Rating },
+                include: {
+                    model: Place,
+                    include: {
+                        model: Rating,
+                        attributes: ['rating'],
+                    },
+                },
             })
             .then((trips) => {
                 res.status(200).send({ trips });
