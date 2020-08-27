@@ -75,7 +75,7 @@ module.exports = {
     getSignedUrlPut(req, res) {
         let extension = req.query.type.toLowerCase().trim();
         let isFullAudio = req.query.isFull;
-        console.log(`ifFullAudio ${isFullAudio}`);
+        console.log(`isFullAudio ${isFullAudio}`);
         let fileType = extension.replace('jpg', 'jpeg');
         let contentType = '';
         let key = '';
@@ -95,8 +95,14 @@ module.exports = {
       }/${uuid.v4()}.${extension}`;
         }
 
+        let bucket = process.env.S3_BUCKET;
+        if (isFullAudio == 'true') bucket = process.env.S3_BUCKET_SECURED;
+
+        let url = process.env.S3_URL;
+        if (isFullAudio == 'true') url = process.env.S3_URL_SECURED;
+
         let params = {
-            Bucket: process.env.S3_BUCKET,
+            Bucket: bucket,
             Key: key,
             Expires: 60 * 60,
             ContentType: contentType,
@@ -104,9 +110,10 @@ module.exports = {
         };
         s3.getSignedUrlPromise('putObject', params)
             .then((uploadUrl) => {
+                console.log(uploadUrl);
                 res.status(200).send({
                     uploadUrl,
-                    downloadUrl: `${process.env.S3_URL}${params.Key}`,
+                    downloadUrl: `${url}${params.Key}`,
                 });
             })
             .catch((error) => res.status(400).send(error));

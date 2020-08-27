@@ -34,6 +34,8 @@ provider:
     IMAGE_TYPES: ${self:custom.env.IMAGE_TYPES}
     S3_BUCKET: ${self:custom.env.S3_BUCKET}
     S3_URL: ${self:custom.env.S3_URL}
+    S3_BUCKET_SECURED: ${self:custom.env.S3_BUCKET_SECURED}
+    S3_URL_SECURED: ${self:custom.env.S3_URL_SECURED}
     # LOGLEVEL: ${self:custom.env.LOGLEVEL}
     # TOKEN_TIME_SET: ${self:custom.env.TOKEN_TIME_SET}
     # SECRET_PASSWORD_TOKEN: ${self:custom.env.SECRET_PASSWORD_TOKEN}
@@ -64,6 +66,8 @@ custom:
     PASSWORD: ${self:custom.env.${self:custom.stage}.PASSWORD, self:custom.env.default.PASSWORD}
     S3_BUCKET: ${self:custom.env.${self:custom.stage}.S3_BUCKET, self:custom.env.default.S3_BUCKET}
     S3_URL: ${self:custom.env.${self:custom.stage}.S3_URL, self:custom.env.default.S3_URL}
+    S3_BUCKET_SECURED: ${self:custom.env.${self:custom.stage}.S3_BUCKET_SECURED, self:custom.env.default.S3_BUCKET_SECURED}
+    S3_URL_SECURED: ${self:custom.env.${self:custom.stage}.S3_URL_SECURED, self:custom.env.default.S3_URL_SECURED}
     IAM_ROLE: ${self:custom.env.${self:custom.stage}.IAM_ROLE, self:custom.env.default.IAM_ROLE}
     AUDIO_FOLDER: ${self:custom.env.${self:custom.stage}.AUDIO_FOLDER, self:custom.env.default.AUDIO_FOLDER}
     IMAGE_FOLDER: ${self:custom.env.${self:custom.stage}.IMAGE_FOLDER, self:custom.env.default.IMAGE_FOLDER}
@@ -83,9 +87,11 @@ custom:
       DB: ${ssm:/api/${self:custom.stage}/db/name}
       USER: ${ssm:/api/${self:custom.stage}/db/username}
       PASSWORD: ${ssm:/api/${self:custom.stage}/db/password~true}
+      IAM_ROLE: ${ssm:/api/${self:custom.stage}/security/iam-role}
       S3_BUCKET: ${ssm:/api/${self:custom.stage}/storage/name}
       S3_URL: ${ssm:/api/${self:custom.stage}/storage/domain}
-      IAM_ROLE: ${ssm:/api/${self:custom.stage}/security/iam-role}
+      S3_BUCKET_SECURED: ${ssm:/api/${self:custom.stage}/storage/secured/name}
+      S3_URL_SECURED: ${ssm:/api/${self:custom.stage}/storage/secured/domain}
       AUDIO_FOLDER: 'audios'
       IMAGE_FOLDER: 'images'
       AUDIO_TYPES: 'mpeg,wav,webm,ogg,mp3,mp4,m4a'
