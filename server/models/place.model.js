@@ -56,6 +56,12 @@ module.exports = (sequelize, DataTypes) => {
             field: 'full_audio_url',
             allowNull: true,
         },
+        fullAudioLength: {
+            type: Sequelize.FLOAT(53),
+            field: 'full_audio_length',
+            allowNull: true,
+            defaultValue: 0,
+        },
         previewAudioUrl: {
             type: Sequelize.STRING,
             field: 'preview_audio_url',

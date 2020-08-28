@@ -118,4 +118,37 @@ module.exports = {
             })
             .catch((error) => res.status(400).send(error));
     },
+
+    getSignedUrlGet(req, res) {
+        let extension = req.query.type.toLowerCase().trim();
+        let isFullAudio = req.query.isFull;
+        let fileName = req.query.filename;
+        let key = '';
+        let audio_types = process.env.AUDIO_TYPES.split(',');
+        let image_types = process.env.IMAGE_TYPES.split(',');
+        if (image_types.indexOf(extension) > 0) {
+            key = `trips/${req.params.tripId}/${process.env.IMAGE_FOLDER}/places/${req.params.id}/${fileName}.${extension}`;
+        }
+
+        if (audio_types.indexOf(extension) > 0) {
+            key = `trips/${req.params.tripId}/${process.env.AUDIO_FOLDER}/places/${req.params.id}/${fileName}.${extension}`;
+        }
+
+        let bucket = process.env.S3_BUCKET;
+        if (isFullAudio == 'true') bucket = process.env.S3_BUCKET_SECURED;
+
+        let url = process.env.S3_URL;
+        if (isFullAudio == 'true') url = process.env.S3_URL_SECURED;
+
+        let params = {
+            Bucket: bucket,
+            Key: key,
+            Expires: 60 * 60,
+        };
+        s3.getSignedUrlPromise('getObject', params)
+            .then((downloadUrl) => {
+                res.status(200).send({ downloadUrl });
+            })
+            .catch((error) => res.status(400).send(error));
+    },
 };

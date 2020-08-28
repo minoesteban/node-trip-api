@@ -20,4 +20,10 @@ router.put(
     place.getSignedUrlPut
 );
 
+router.get(
+    '/:tripId/places/:id/files',
+    validator.getSignedUrlGet,
+    place.getSignedUrlGet
+);
+
 module.exports = router;

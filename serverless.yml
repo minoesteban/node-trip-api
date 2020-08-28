@@ -164,6 +164,10 @@ functions:
           path: /api/${self:custom.version}/trips/{tripId}/files
           method: PUT
           cors: true
+      - http:
+          path: /api/${self:custom.version}/trips/{tripId}/files
+          method: GET
+          cors: true
   place:
     handler: server/handlers/place.handler
     description: 'Lambda Places handler'
@@ -195,6 +199,10 @@ functions:
       - http:
           path: /api/${self:custom.version}/trips/{tripId}/places/{placeId}/files
           method: PUT
+          cors: true
+      - http:
+          path: /api/${self:custom.version}/trips/{tripId}/places/{placeId}/files
+          method: GET
           cors: true
   purchase:
     handler: server/handlers/purchase.handler

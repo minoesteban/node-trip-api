@@ -8,10 +8,14 @@ const uuid = require('uuid');
 
 module.exports = {
     create(req, res) {
-        return sequelize.transaction(async(t) => {
-            await Trip.create(req.body, { include: [{ model: Place }], transaction: t })
-                .then((trip) => res.status(200).send({ trip }));
-        }).catch((error) => res.status(400).send(error));
+        return sequelize
+            .transaction(async(t) => {
+                await Trip.create(req.body, {
+                    include: [{ model: Place }],
+                    transaction: t,
+                }).then((trip) => res.status(200).send({ trip }));
+            })
+            .catch((error) => res.status(400).send(error));
     },
 
     delete(req, res) {
@@ -129,6 +133,32 @@ module.exports = {
                     uploadUrl,
                     downloadUrl: `${process.env.S3_URL}${params.Key}`,
                 });
+            })
+            .catch((error) => res.status(400).send(error));
+    },
+
+    getSignedUrlGet(req, res) {
+        let extension = req.query.type.toLowerCase().trim();
+        let fileName = req.query.filename;
+        let key = '';
+        let audio_types = process.env.AUDIO_TYPES.split(',');
+        let image_types = process.env.IMAGE_TYPES.split(',');
+        if (image_types.indexOf(extension) > 0) {
+            key = `trips/${req.params.id}/${process.env.IMAGE_FOLDER}/${fileName}.${extension}`;
+        }
+
+        if (audio_types.indexOf(extension) > 0) {
+            key = `trips/${req.params.id}/${process.env.AUDIO_FOLDER}/${fileName}.${extension}`;
+        }
+
+        let params = {
+            Bucket: process.env.S3_BUCKET,
+            Key: key,
+            Expires: 60 * 60,
+        };
+        s3.getSignedUrlPromise('getObject', params)
+            .then((downloadUrl) => {
+                res.status(200).send({ downloadUrl });
             })
             .catch((error) => res.status(400).send(error));
     },

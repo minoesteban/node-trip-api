@@ -12,6 +12,8 @@ router.patch('/:id', validator.update, trip.update);
 
 router.put('/:id/files', validator.getSignedUrlPut, trip.getSignedUrlPut);
 
+router.get('/:id/files', validator.getSignedUrlGet, trip.getSignedUrlGet);
+
 router.delete('/:id', validator.delete, trip.delete);
 
 module.exports = router;
