@@ -76,16 +76,6 @@ module.exports = (sequelize, DataTypes) => {
             field: 'purchased_places',
             allowNull: true,
         },
-        downloadedTrips: {
-            type: Sequelize.ARRAY(Sequelize.INTEGER),
-            field: 'downloaded_trips',
-            allowNull: true,
-        },
-        downloadedPlaces: {
-            type: Sequelize.ARRAY(Sequelize.INTEGER),
-            field: 'downloaded_places',
-            allowNull: true,
-        },
     }, {
         schema: 'public',
         tableName: 'user',
@@ -103,7 +93,7 @@ module.exports = (sequelize, DataTypes) => {
             },
         },
         defaultScope: {
-            attributes: { exclude: ['password'] },
+            attributes: { exclude: ['password', 'pin'] },
         },
         scopes: {
             withPassword: {

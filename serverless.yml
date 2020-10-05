@@ -115,20 +115,12 @@ functions:
     description: 'Lambda Users handler'
     events:
       - http:
-          path: /api/${self:custom.version}/users
-          method: GET
-          cors: true
-      - http:
           path: /api/${self:custom.version}/users/login
           method: GET
           cors: true
       - http:
           path: /api/${self:custom.version}/users/signup
           method: POST
-          cors: true
-      - http:
-          path: /api/${self:custom.version}/users/all
-          method: GET
           cors: true
       - http:
           path: /api/${self:custom.version}/users/{userId}

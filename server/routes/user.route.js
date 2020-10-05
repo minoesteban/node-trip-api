@@ -4,15 +4,9 @@ const router = require('express').Router();
 
 router.post('/signup', user.create);
 
-router.get('/', user.getByUsername);
-
-router.get('/all', user.getAll);
+router.get('/login', user.validUser);
 
 router.put('/:id/files', validator.getSignedUrlPut, user.getSignedUrlPut);
-
-// router.get('/images/:key', user.getImage);
-
-router.get('/login', user.validUser);
 
 router.get('/:id', validator.getById, user.getById);
 
