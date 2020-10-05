@@ -9,7 +9,7 @@ plugins:
 provider:
   name: aws
   runtime: nodejs12.x
-  # memorySize: 256
+  memorySize: 128
   # timeout: 30 # no se puede poner más que esto, API Gateway tiene como restricción 30seg de timeout
   role: ${self:custom.env.IAM_ROLE} #arn:aws:iam::454213127160:role/trip-api-lambda
 
@@ -36,6 +36,8 @@ provider:
     S3_URL: ${self:custom.env.S3_URL}
     S3_BUCKET_SECURED: ${self:custom.env.S3_BUCKET_SECURED}
     S3_URL_SECURED: ${self:custom.env.S3_URL_SECURED}
+    NOREPLY_USER: ${self:custom.env.NOREPLY_USER}
+    NOREPLY_PASS: ${self:custom.env.NOREPLY_PASS}
     # LOGLEVEL: ${self:custom.env.LOGLEVEL}
     # TOKEN_TIME_SET: ${self:custom.env.TOKEN_TIME_SET}
     # SECRET_PASSWORD_TOKEN: ${self:custom.env.SECRET_PASSWORD_TOKEN}
@@ -73,6 +75,8 @@ custom:
     IMAGE_FOLDER: ${self:custom.env.${self:custom.stage}.IMAGE_FOLDER, self:custom.env.default.IMAGE_FOLDER}
     AUDIO_TYPES: ${self:custom.env.${self:custom.stage}.AUDIO_TYPES, self:custom.env.default.AUDIO_TYPES}
     IMAGE_TYPES: ${self:custom.env.${self:custom.stage}.IMAGE_TYPES, self:custom.env.default.IMAGE_TYPES}
+    NOREPLY_USER: ${self:custom.env.${self:custom.stage}.NOREPLY_USER, self:custom.env.default.NOREPLY_USER}
+    NOREPLY_PASS: ${self:custom.env.${self:custom.stage}.NOREPLY_PASS, self:custom.env.default.NOREPLY_PASS}
     # LOGLEVEL: ${self:custom.env.${self:custom.stage}.LOGLEVEL, self:custom.env.default.LOGLEVEL}
     # DB_SECURITY_GROUP: ${self:custom.env.${self:custom.stage}.DB_SECURITY_GROUP, self:custom.env.default.DB_SECURITY_GROUP}
     # DB_SUBNETS: ${self:custom.env.${self:custom.stage}.DB_SUBNETS, self:custom.env.default.DB_SUBNETS}
@@ -92,6 +96,8 @@ custom:
       S3_URL: ${ssm:/api/${self:custom.stage}/storage/domain}
       S3_BUCKET_SECURED: ${ssm:/api/${self:custom.stage}/storage/secured/name}
       S3_URL_SECURED: ${ssm:/api/${self:custom.stage}/storage/secured/domain}
+      NOREPLY_USER: ${ssm:/api/${self:custom.stage}/email/noreply/user}
+      NOREPLY_PASS: ${ssm:/api/${self:custom.stage}/email/noreply/password~true}
       AUDIO_FOLDER: 'audios'
       IMAGE_FOLDER: 'images'
       AUDIO_TYPES: 'mpeg,wav,webm,ogg,mp3,mp4,m4a'
@@ -113,7 +119,11 @@ functions:
           method: GET
           cors: true
       - http:
-          path: /api/${self:custom.version}/users
+          path: /api/${self:custom.version}/users/login
+          method: GET
+          cors: true
+      - http:
+          path: /api/${self:custom.version}/users/signup
           method: POST
           cors: true
       - http:
@@ -128,10 +138,6 @@ functions:
           path: /api/${self:custom.version}/users/{userId}/files
           method: PUT
           cors: true
-      #   - http:
-      #       path: /api/${self:custom.version}/users/images/{key}
-      #       method: GET
-      #       cors: true
       - http:
           path: /api/${self:custom.version}/users/{userId}
           method: PATCH

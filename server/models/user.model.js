@@ -61,57 +61,9 @@ module.exports = (sequelize, DataTypes) => {
             field: 'about',
             allowNull: true,
         },
-        languageId1: {
-            type: Sequelize.STRING(2),
-            field: 'language_id_1',
-            allowNull: true,
-        },
-        languageId2: {
-            type: Sequelize.STRING(2),
-            field: 'language_id_2',
-            allowNull: true,
-        },
-        languageId3: {
-            type: Sequelize.STRING(2),
-            field: 'language_id_3',
-            allowNull: true,
-        },
-        languageId4: {
-            type: Sequelize.STRING(2),
-            field: 'language_id_4',
-            allowNull: true,
-        },
-        languageId5: {
-            type: Sequelize.STRING(2),
-            field: 'language_id_5',
-            allowNull: true,
-        },
-        onlyNearest: {
-            type: Sequelize.BOOLEAN,
-            field: 'only_nearest',
-            defaultValue: 0,
-            allowNull: true,
-        },
-        onlyFavourites: {
-            type: Sequelize.BOOLEAN,
-            field: 'only_favourites',
-            defaultValue: 0,
-            allowNull: true,
-        },
-        onlyPurchased: {
-            type: Sequelize.BOOLEAN,
-            field: 'only_purchased',
-            defaultValue: 0,
-            allowNull: true,
-        },
-        favouriteTrips: {
-            type: Sequelize.ARRAY(Sequelize.INTEGER),
-            field: 'favourite_trips',
-            allowNull: true,
-        },
-        favouritePlaces: {
-            type: Sequelize.ARRAY(Sequelize.INTEGER),
-            field: 'favourite_places',
+        pin: {
+            type: Sequelize.INTEGER,
+            field: 'pin',
             allowNull: true,
         },
         purchasedTrips: {

@@ -2,18 +2,29 @@ const User = require('../models/index').User;
 const AWS = require('aws-sdk');
 const s3 = new AWS.S3({ signatureVersion: 'v4' });
 const uuid = require('uuid');
-const { response } = require('express');
+const sendEmail = require('../utils/send-email');
 
 module.exports = {
     create(req, res) {
+        let PIN = Math.floor(Math.random() * 900000) + 100000;
         return User.create({
                 username: req.body.username,
                 password: req.body.password,
                 firstName: req.body.firstName,
                 lastName: req.body.lastName,
+                email: req.body.email,
                 about: req.body.about,
+                active: 0,
+                pin: PIN,
             })
-            .then((item) => res.status(200).send({ item }))
+            .then((item) =>
+                sendEmail({ PIN: PIN }, 'registered')
+                .then((result) => {
+                    console.log(result);
+                    res.status(200).send({ item });
+                })
+                .catch((err) => {})
+            )
             .catch((error) => res.status(400).send(error));
     },
 
