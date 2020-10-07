@@ -1,7 +1,7 @@
 service: trip-api
 
 plugins:
-  # - serverless-offline
+  #   - serverless-offline
   # - serverless-pseudo-parameters
   # - serverless-plugin-split-stacks
   - serverless-prune-plugin
@@ -116,11 +116,15 @@ functions:
     events:
       - http:
           path: /api/${self:custom.version}/users/login
-          method: GET
+          method: POST
           cors: true
       - http:
           path: /api/${self:custom.version}/users/signup
           method: POST
+          cors: true
+      - http:
+          path: /api/${self:custom.version}/users/activate
+          method: PUT
           cors: true
       - http:
           path: /api/${self:custom.version}/users/{userId}

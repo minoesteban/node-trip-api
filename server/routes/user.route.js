@@ -2,9 +2,11 @@ const user = require('../controllers').user;
 const validator = require('../validators/user.validator');
 const router = require('express').Router();
 
-router.post('/signup', user.create);
+router.post('/signup', validator.create, user.create);
 
-router.get('/login', user.validUser);
+router.post('/login', validator.login, user.login);
+
+router.put('/activate', validator.activate, user.activate);
 
 router.put('/:id/files', validator.getSignedUrlPut, user.getSignedUrlPut);
 

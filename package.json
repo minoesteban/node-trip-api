@@ -22,7 +22,8 @@
         "sequelize": "^6.3.4",
         "serverless-http": "^2.5.0",
         "serverless-prune-plugin": "^1.4.3",
-        "uuid": "^8.3.0"
+        "uuid": "^8.3.0",
+        "validator": "^13.1.17"
     },
     "devDependencies": {
         "serverless-offline": "^6.5.0",

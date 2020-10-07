@@ -37,38 +37,65 @@ module.exports = {
                 about: req.body.about,
                 imageUrl: req.body.imageUrl,
             }, { where: { id: req.params.id }, returning: true })
-            .then((item) => res.status(200).send({ item }))
-            .catch((error) => res.status(400).send(error));
+            .then((item) => {
+                console.log(item);
+                res.status(200).send({ item });
+            })
+            .catch((error) => {
+                console.log(error);
+                res.status(400).send(error);
+            });
     },
 
     getById(req, res) {
         return User.findOne({ where: { id: req.params.id, active: true } })
             .then((user) => {
+                console.log(user);
                 res.status(200).send({ user });
             })
-            .catch((error) => res.status(400).send(error));
+            .catch((error) => {
+                console.log(error);
+                res.status(400).send(error);
+            });
     },
 
-    validUser(req, res) {
-        return User.findOne({
+    login(req, res) {
+        return User.scope('withPassword')
+            .findOne({
                 where: { username: req.body.username, active: true },
             })
             .then(async function(user) {
                 if (user) {
                     if (await user.validPassword(req.body.password)) {
-                        res.status(200).send({ user });
+                        res.status(200).send(true);
                     } else {
-                        res.status(400).send({
-                            result: 'username or password invalid',
-                        });
+                        res.status(400).send(false);
                     }
                 } else {
-                    res.status(400).send({
-                        result: 'username or password invalid',
-                    });
+                    res.status(400).send(false);
                 }
             })
-            .catch((error) => res.status(400).send(error));
+            .catch((error) => {
+                console.log(error);
+                res.status(400).send(error);
+            });
+    },
+
+    activate(req, res) {
+        return User.update({
+                active: 1,
+            }, {
+                where: { username: req.body.username, pin: req.body.PIN },
+            })
+            .then((item) => {
+                console.log(item);
+                if (item > 0) res.status(200).send(true);
+                else res.status(400).send(false);
+            })
+            .catch((error) => {
+                console.log(error);
+                res.status(400).send(error);
+            });
     },
 
     getSignedUrlPut(req, res) {
@@ -90,6 +117,9 @@ module.exports = {
                     downloadUrl: `${process.env.S3_URL}${params.Key}`,
                 });
             })
-            .catch((error) => res.status(400).send(error));
+            .catch((error) => {
+                console.log(error);
+                res.status(400).send(error);
+            });
     },
 };
