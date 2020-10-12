@@ -1,25 +1,16 @@
 service: trip-api
 
 plugins:
-  #   - serverless-offline
-  # - serverless-pseudo-parameters
-  # - serverless-plugin-split-stacks
+  # - serverless-offline
   - serverless-prune-plugin
 
 provider:
   name: aws
   runtime: nodejs12.x
   memorySize: 128
-  # timeout: 30 # no se puede poner más que esto, API Gateway tiene como restricción 30seg de timeout
-  role: ${self:custom.env.IAM_ROLE} #arn:aws:iam::454213127160:role/trip-api-lambda
-
-  #   apiGateway:
-  #     binaryMediaTypes:
-  #       - '*/*'
-  # vpc:
-  #   securityGroupIds:
-  #     { 'Fn::Split': [',', '${self:custom.env.DB_SECURITY_GROUP}'] }
-  #   subnetIds: { 'Fn::Split': [',', '${self:custom.env.DB_SUBNETS}'] }
+  role: ${self:custom.env.IAM_ROLE}
+  apiKeys:
+    - test-trip-api
 
   environment:
     APP_VERSION: ${self:custom.version}
@@ -38,18 +29,11 @@ provider:
     S3_URL_SECURED: ${self:custom.env.S3_URL_SECURED}
     NOREPLY_USER: ${self:custom.env.NOREPLY_USER}
     NOREPLY_PASS: ${self:custom.env.NOREPLY_PASS}
-    # LOGLEVEL: ${self:custom.env.LOGLEVEL}
-    # TOKEN_TIME_SET: ${self:custom.env.TOKEN_TIME_SET}
-    # SECRET_PASSWORD_TOKEN: ${self:custom.env.SECRET_PASSWORD_TOKEN}
 
 package:
   include:
     - node_modules/**
     - server/**
-  # exclude:
-  #   - serverless_ymls/**
-  #   - apidoc/**
-  #   - test/**
 
 custom:
   stage: ${opt:stage, 'dev'}
@@ -77,12 +61,6 @@ custom:
     IMAGE_TYPES: ${self:custom.env.${self:custom.stage}.IMAGE_TYPES, self:custom.env.default.IMAGE_TYPES}
     NOREPLY_USER: ${self:custom.env.${self:custom.stage}.NOREPLY_USER, self:custom.env.default.NOREPLY_USER}
     NOREPLY_PASS: ${self:custom.env.${self:custom.stage}.NOREPLY_PASS, self:custom.env.default.NOREPLY_PASS}
-    # LOGLEVEL: ${self:custom.env.${self:custom.stage}.LOGLEVEL, self:custom.env.default.LOGLEVEL}
-    # DB_SECURITY_GROUP: ${self:custom.env.${self:custom.stage}.DB_SECURITY_GROUP, self:custom.env.default.DB_SECURITY_GROUP}
-    # DB_SUBNETS: ${self:custom.env.${self:custom.stage}.DB_SUBNETS, self:custom.env.default.DB_SUBNETS}
-    # VPC_ID: ${self:custom.env.${self:custom.stage}.VPC_ID, self:custom.env.default.VPC_ID}
-    # TOKEN_TIME_SET: ${self:custom.env.${self:custom.stage}.TOKEN_TIME_SET, self:custom.env.default.TOKEN_TIME_SET}
-    # SECRET_PASSWORD_TOKEN: ${self:custom.env.${self:custom.stage}.SECRET_PASSWORD_TOKEN, self:custom.env.default.SECRET_PASSWORD_TOKEN}
 
     default:
       APP_VERSION: ${self:custom.version}
@@ -102,12 +80,6 @@ custom:
       IMAGE_FOLDER: 'images'
       AUDIO_TYPES: 'mpeg,wav,webm,ogg,mp3,mp4,m4a'
       IMAGE_TYPES: 'gif,png,jpeg,jpg,webp'
-      # LOGLEVEL: 'WARN'
-      # DB_SECURITY_GROUP: ${ssm:/api/${self:custom.stage}/security/vpc/sg/lambda}
-      # DB_SUBNETS: ${ssm:/api/${self:custom.stage}/security/vpc/subnets/private}
-      # VPC_ID: ${ssm:/api/${self:custom.stage}/security/vpc/id}
-      # TOKEN_TIME_SET: ${ssm:/api/${self:custom.stage}/security/token_time_set}
-      # SECRET_PASSWORD_TOKEN: ${ssm:/api/${self:custom.stage}/security/secret_password_token}
 
 functions:
   user:
@@ -118,26 +90,32 @@ functions:
           path: /api/${self:custom.version}/users/login
           method: POST
           cors: true
+          private: true
       - http:
           path: /api/${self:custom.version}/users/signup
           method: POST
           cors: true
+          private: true
       - http:
           path: /api/${self:custom.version}/users/activate
           method: PUT
           cors: true
+          private: true
       - http:
           path: /api/${self:custom.version}/users/{userId}
           method: GET
           cors: true
+          private: true
       - http:
           path: /api/${self:custom.version}/users/{userId}/files
           method: PUT
           cors: true
+          private: true
       - http:
           path: /api/${self:custom.version}/users/{userId}
           method: PATCH
           cors: true
+          private: true
   trip:
     handler: server/handlers/trip.handler
     description: 'Lambda Trips handler'
@@ -146,30 +124,37 @@ functions:
           path: /api/${self:custom.version}/trips/{tripId}
           method: GET
           cors: true
+          private: true
       - http:
           path: /api/${self:custom.version}/trips
           method: POST
           cors: true
+          private: true
       - http:
           path: /api/${self:custom.version}/trips/all
           method: GET
           cors: true
+          private: true
       - http:
           path: /api/${self:custom.version}/trips/{tripId}
           method: PATCH
           cors: true
+          private: true
       - http:
           path: /api/${self:custom.version}/trips/{tripId}
           method: DELETE
           cors: true
+          private: true
       - http:
           path: /api/${self:custom.version}/trips/{tripId}/files
           method: PUT
           cors: true
+          private: true
       - http:
           path: /api/${self:custom.version}/trips/{tripId}/files
           method: GET
           cors: true
+          private: true
   place:
     handler: server/handlers/place.handler
     description: 'Lambda Places handler'
@@ -178,34 +163,42 @@ functions:
           path: /api/${self:custom.version}/trips/places/all
           method: GET
           cors: true
+          private: true
       - http:
           path: /api/${self:custom.version}/trips/{tripId}/places/{placeId}
           method: GET
           cors: true
+          private: true
       - http:
           path: /api/${self:custom.version}/trips/{tripId}/places
           method: GET
           cors: true
+          private: true
       - http:
           path: /api/${self:custom.version}/trips/{tripId}/places
           method: POST
           cors: true
+          private: true
       - http:
           path: /api/${self:custom.version}/trips/{tripId}/places/{placeId}
           method: PATCH
           cors: true
+          private: true
       - http:
           path: /api/${self:custom.version}/trips/{tripId}/places/{placeId}
           method: DELETE
           cors: true
+          private: true
       - http:
           path: /api/${self:custom.version}/trips/{tripId}/places/{placeId}/files
           method: PUT
           cors: true
+          private: true
       - http:
           path: /api/${self:custom.version}/trips/{tripId}/places/{placeId}/files
           method: GET
           cors: true
+          private: true
   purchase:
     handler: server/handlers/purchase.handler
     description: 'Lambda Purchases handler'
@@ -214,22 +207,27 @@ functions:
           path: /api/${self:custom.version}/purchases/all
           method: GET
           cors: true
+          private: true
       - http:
           path: /api/${self:custom.version}/purchases/count
           method: GET
           cors: true
+          private: true
       - http:
           path: /api/${self:custom.version}/purchases
           method: GET
           cors: true
+          private: true
       - http:
           path: /api/${self:custom.version}/purchases
           method: POST
           cors: true
+          private: true
       - http:
           path: /api/${self:custom.version}/purchases/{purchaseId}
           method: PATCH
           cors: true
+          private: true
   rating:
     handler: server/handlers/rating.handler
     description: 'Lambda Ratings handler'
@@ -238,15 +236,19 @@ functions:
           path: /api/${self:custom.version}/ratings/all
           method: GET
           cors: true
+          private: true
       - http:
           path: /api/${self:custom.version}/ratings
           method: GET
           cors: true
+          private: true
       - http:
           path: /api/${self:custom.version}/ratings
           method: POST
           cors: true
+          private: true
       - http:
           path: /api/${self:custom.version}/ratings/{ratingId}
           method: PATCH
           cors: true
+          private: true

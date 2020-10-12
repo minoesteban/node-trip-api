@@ -15,12 +15,12 @@ module.exports = {
 
     login(req, res, next) {
         if (req.body.username && req.body.password) next();
-        else return res.status(400).send(false);
+        else return res.status(400).send({ success: false, message: 'invalid password or username' });
     },
 
     activate(req, res, next) {
         if (req.body.username && req.body.PIN) next();
-        else return res.status(400).send(false);
+        else return res.status(400).send({ success: false, message: 'invalid PIN or username' });
     },
 
     getById(req, res, next) {

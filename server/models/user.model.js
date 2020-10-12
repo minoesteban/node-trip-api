@@ -76,6 +76,31 @@ module.exports = (sequelize, DataTypes) => {
             field: 'purchased_places',
             allowNull: true,
         },
+        downloadedTrips: {
+            type: Sequelize.ARRAY(Sequelize.INTEGER),
+            field: 'downloaded_trips',
+            allowNull: true,
+        },
+        downloadedPlaces: {
+            type: Sequelize.ARRAY(Sequelize.INTEGER),
+            field: 'downloaded_places',
+            allowNull: true,
+        },
+        favouriteTrips: {
+            type: Sequelize.ARRAY(Sequelize.INTEGER),
+            field: 'favourite_trips',
+            allowNull: true,
+        },
+        favouritePlaces: {
+            type: Sequelize.ARRAY(Sequelize.INTEGER),
+            field: 'favourite_places',
+            allowNull: true,
+        },
+        selectedLanguages: {
+            type: Sequelize.ARRAY(Sequelize.STRING),
+            field: 'selected_languages',
+            allowNull: true,
+        },
     }, {
         schema: 'public',
         tableName: 'user',

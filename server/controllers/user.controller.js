@@ -1,3 +1,4 @@
+'use strict';
 const User = require('../models/index').User;
 const AWS = require('aws-sdk');
 const s3 = new AWS.S3({ signatureVersion: 'v4' });
@@ -16,17 +17,21 @@ module.exports = {
                 active: 0,
                 pin: PIN,
             })
-            .then((item) =>
+            .then((_) =>
                 mailer
                 .sendEmail({ email: req.body.username, PIN: PIN }, 'registered')
                 .then((result) => {
                     console.log(result);
-                    res.status(200).send({ item });
+                    res.status(200).send({ success: true, message: 'user created' });
                 })
             )
             .catch((error) => {
                 console.log(error);
-                res.status(400).send(error);
+                if (error.name === 'SequelizeUniqueConstraintError') {
+                    res.status(400).send({ success: false, message: 'email is already registered' });
+                } else {
+                    res.status(500).send({ success: false, message: error });
+                }
             });
     },
 
@@ -36,14 +41,18 @@ module.exports = {
                 lastName: req.body.lastName,
                 about: req.body.about,
                 imageUrl: req.body.imageUrl,
+                downloadedTrips: req.body.downloadedTrips,
+                downloadedPlaces: req.body.downloadedPlaces,
+                favouriteTrips: req.body.favouriteTrips,
+                favouritePlaces: req.body.favouritePlaces,
+                selectedLanguages: req.body.selectedLanguages,
             }, { where: { id: req.params.id }, returning: true })
             .then((item) => {
-                console.log(item);
-                res.status(200).send({ item });
+                res.status(200).send({ success: true, item });
             })
             .catch((error) => {
                 console.log(error);
-                res.status(400).send(error);
+                res.status(500).send({ success: false, message: error });
             });
     },
 
@@ -51,33 +60,43 @@ module.exports = {
         return User.findOne({ where: { id: req.params.id, active: true } })
             .then((user) => {
                 console.log(user);
-                res.status(200).send({ user });
+                res.status(200).send({ success: true, user });
             })
             .catch((error) => {
                 console.log(error);
-                res.status(400).send(error);
+                res.status(500).send({ success: false, message: error });
             });
     },
 
     login(req, res) {
+        console.log(req.body);
         return User.scope('withPassword')
             .findOne({
-                where: { username: req.body.username, active: true },
+                where: { username: req.body.username },
             })
             .then(async function(user) {
                 if (user) {
                     if (await user.validPassword(req.body.password)) {
-                        res.status(200).send(true);
+                        if (user.active === true)
+                            res.status(200).send({ success: true, message: user.id });
+                        else {
+                            mailer
+                                .sendEmail({ email: req.body.username, PIN: user.pin }, 'registered')
+                                .then((result) => {
+                                    console.log(result);
+                                    res.status(200).send({ success: false, message: 0 });
+                                })
+                        }
                     } else {
-                        res.status(400).send(false);
+                        res.status(400).send({ success: false, message: 'invalid username or password' });
                     }
                 } else {
-                    res.status(400).send(false);
+                    res.status(400).send({ success: false, message: 'invalid username or password' });
                 }
             })
             .catch((error) => {
                 console.log(error);
-                res.status(400).send(error);
+                res.status(500).send({ success: false, message: error });
             });
     },
 
@@ -89,12 +108,12 @@ module.exports = {
             })
             .then((item) => {
                 console.log(item);
-                if (item > 0) res.status(200).send(true);
-                else res.status(400).send(false);
+                if (item > 0) res.status(200).send({ success: true, message: 'account activated' });
+                else res.status(400).send({ success: false, message: 'invalid username or pincode' });
             })
             .catch((error) => {
                 console.log(error);
-                res.status(400).send(error);
+                res.status(500).send({ success: false, message: error });
             });
     },
 
@@ -119,7 +138,7 @@ module.exports = {
             })
             .catch((error) => {
                 console.log(error);
-                res.status(400).send(error);
+                res.status(500).send({ success: false, message: error });
             });
     },
 };
