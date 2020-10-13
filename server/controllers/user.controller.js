@@ -14,6 +14,7 @@ module.exports = {
                 firstName: req.body.firstName,
                 lastName: req.body.lastName,
                 about: req.body.about,
+                isGuide: req.body.isGuide,
                 active: 0,
                 pin: PIN,
             })
@@ -40,6 +41,7 @@ module.exports = {
                 firstName: req.body.firstName,
                 lastName: req.body.lastName,
                 about: req.body.about,
+                isGuide: req.body.isGuide,
                 imageUrl: req.body.imageUrl,
                 downloadedTrips: req.body.downloadedTrips,
                 downloadedPlaces: req.body.downloadedPlaces,
@@ -78,7 +80,17 @@ module.exports = {
                 if (user) {
                     if (await user.validPassword(req.body.password)) {
                         if (user.active === true)
-                            res.status(200).send({ success: true, message: user.id });
+                            res.status(200).send({
+                                success: true,
+                                message: user.id,
+                                keys: {
+                                    gp: process.env.GOOGLE_PLACES_API_KEY,
+                                    ak: process.env.AWS_ACC_KEY_ID,
+                                    sk: process.env.AWS_SEC_ACCESS_KEY,
+                                    gk: process.env.GATEWAY_API_KEY,
+                                    oi: process.env.ONESIGNAL_APP_ID
+                                }
+                            });
                         else {
                             mailer
                                 .sendEmail({ email: req.body.username, PIN: user.pin }, 'registered')
@@ -126,7 +138,6 @@ module.exports = {
       }/${uuid.v4()}.${fileType}`,
             Expires: 60 * 60,
             ContentType: `image/${fileType}`,
-            // ACL: 'public-read',
         };
 
         s3.getSignedUrlPromise('putObject', params)

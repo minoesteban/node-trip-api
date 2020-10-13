@@ -29,6 +29,12 @@ provider:
     S3_URL_SECURED: ${self:custom.env.S3_URL_SECURED}
     NOREPLY_USER: ${self:custom.env.NOREPLY_USER}
     NOREPLY_PASS: ${self:custom.env.NOREPLY_PASS}
+    GOOGLE_PLACES_API_KEY: ${self:custom.env.GOOGLE_PLACES_API_KEY}
+    AWS_ACC_KEY_ID: ${self:custom.env.AWS_ACC_KEY_ID}
+    AWS_SEC_ACCESS_KEY: ${self:custom.env.AWS_SEC_ACCESS_KEY}
+    GATEWAY_API_KEY: ${self:custom.env.GATEWAY_API_KEY}
+    ONESIGNAL_APP_ID: ${self:custom.env.ONESIGNAL_APP_ID}
+    ONESIGNAL_REST_API_KEY: ${self:custom.env.ONESIGNAL_REST_API_KEY}
 
 package:
   include:
@@ -61,6 +67,12 @@ custom:
     IMAGE_TYPES: ${self:custom.env.${self:custom.stage}.IMAGE_TYPES, self:custom.env.default.IMAGE_TYPES}
     NOREPLY_USER: ${self:custom.env.${self:custom.stage}.NOREPLY_USER, self:custom.env.default.NOREPLY_USER}
     NOREPLY_PASS: ${self:custom.env.${self:custom.stage}.NOREPLY_PASS, self:custom.env.default.NOREPLY_PASS}
+    GOOGLE_PLACES_API_KEY: ${self:custom.env.${self:custom.stage}.GOOGLE_PLACES_API_KEY, self:custom.env.default.GOOGLE_PLACES_API_KEY}
+    AWS_ACC_KEY_ID: ${self:custom.env.${self:custom.stage}.AWS_ACC_KEY_ID, self:custom.env.default.AWS_ACC_KEY_ID}
+    AWS_SEC_ACCESS_KEY: ${self:custom.env.${self:custom.stage}.AWS_SEC_ACCESS_KEY, self:custom.env.default.AWS_SEC_ACCESS_KEY}
+    GATEWAY_API_KEY: ${self:custom.env.${self:custom.stage}.GATEWAY_API_KEY, self:custom.env.default.GATEWAY_API_KEY}
+    ONESIGNAL_APP_ID: ${self:custom.env.${self:custom.stage}.ONESIGNAL_APP_ID, self:custom.env.default.ONESIGNAL_APP_ID}
+    ONESIGNAL_REST_API_KEY: ${self:custom.env.${self:custom.stage}.ONESIGNAL_REST_API_KEY, self:custom.env.default.ONESIGNAL_REST_API_KEY}
 
     default:
       APP_VERSION: ${self:custom.version}
@@ -76,6 +88,12 @@ custom:
       S3_URL_SECURED: ${ssm:/api/${self:custom.stage}/storage/secured/domain}
       NOREPLY_USER: ${ssm:/api/${self:custom.stage}/email/noreply/user}
       NOREPLY_PASS: ${ssm:/api/${self:custom.stage}/email/noreply/password~true}
+      GOOGLE_PLACES_API_KEY: ${ssm:/api/${self:custom.stage}/keys/google-places}
+      AWS_ACC_KEY_ID: ${ssm:/api/${self:custom.stage}/keys/aws-access}
+      AWS_SEC_ACCESS_KEY: ${ssm:/api/${self:custom.stage}/keys/aws-secret}
+      GATEWAY_API_KEY: ${ssm:/api/${self:custom.stage}/keys/aws-gateway}
+      ONESIGNAL_APP_ID: ${ssm:/api/${self:custom.stage}/keys/onesignal-app-id}
+      ONESIGNAL_REST_API_KEY: ${ssm:/api/${self:custom.stage}/keys/onesignal-rest-api}
       AUDIO_FOLDER: 'audios'
       IMAGE_FOLDER: 'images'
       AUDIO_TYPES: 'mpeg,wav,webm,ogg,mp3,mp4,m4a'
@@ -90,17 +108,17 @@ functions:
           path: /api/${self:custom.version}/users/login
           method: POST
           cors: true
-          private: true
+        #   private: true
       - http:
           path: /api/${self:custom.version}/users/signup
           method: POST
           cors: true
-          private: true
+        #   private: true
       - http:
           path: /api/${self:custom.version}/users/activate
           method: PUT
           cors: true
-          private: true
+        #   private: true
       - http:
           path: /api/${self:custom.version}/users/{userId}
           method: GET

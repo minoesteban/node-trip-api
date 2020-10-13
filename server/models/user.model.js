@@ -53,7 +53,13 @@ module.exports = (sequelize, DataTypes) => {
         active: {
             type: Sequelize.BOOLEAN,
             field: 'active',
-            defaultValue: 1,
+            defaultValue: 0,
+            allowNull: false,
+        },
+        isGuide: {
+            type: Sequelize.BOOLEAN,
+            field: 'is_guide',
+            defaultValue: 0,
             allowNull: false,
         },
         about: {
