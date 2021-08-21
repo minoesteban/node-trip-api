@@ -1,7 +1,9 @@
+org: minoesteban1
+app: tripit-api-app
 service: trip-api
 
 plugins:
-  # - serverless-offline
+  - serverless-offline
   - serverless-prune-plugin
 
 provider:
@@ -23,6 +25,7 @@ provider:
     IMAGE_FOLDER: ${self:custom.env.IMAGE_FOLDER}
     AUDIO_TYPES: ${self:custom.env.AUDIO_TYPES}
     IMAGE_TYPES: ${self:custom.env.IMAGE_TYPES}
+    JWT_TOKEN: ${self:custom.env.JWT_TOKEN}
     S3_BUCKET: ${self:custom.env.S3_BUCKET}
     S3_URL: ${self:custom.env.S3_URL}
     S3_BUCKET_SECURED: ${self:custom.env.S3_BUCKET_SECURED}
@@ -42,7 +45,7 @@ package:
     - server/**
 
 custom:
-  stage: ${opt:stage, 'dev'}
+  stage: ${opt:stage, 'test'}
   version: '1.0'
 
   prune:
@@ -60,6 +63,7 @@ custom:
     S3_URL: ${self:custom.env.${self:custom.stage}.S3_URL, self:custom.env.default.S3_URL}
     S3_BUCKET_SECURED: ${self:custom.env.${self:custom.stage}.S3_BUCKET_SECURED, self:custom.env.default.S3_BUCKET_SECURED}
     S3_URL_SECURED: ${self:custom.env.${self:custom.stage}.S3_URL_SECURED, self:custom.env.default.S3_URL_SECURED}
+    JWT_TOKEN: ${self:custom.env.${self:custom.stage}.JWT_TOKEN, self:custom.env.default.JWT_TOKEN}
     IAM_ROLE: ${self:custom.env.${self:custom.stage}.IAM_ROLE, self:custom.env.default.IAM_ROLE}
     AUDIO_FOLDER: ${self:custom.env.${self:custom.stage}.AUDIO_FOLDER, self:custom.env.default.AUDIO_FOLDER}
     IMAGE_FOLDER: ${self:custom.env.${self:custom.stage}.IMAGE_FOLDER, self:custom.env.default.IMAGE_FOLDER}
@@ -83,6 +87,7 @@ custom:
       PASSWORD: ${ssm:/api/${self:custom.stage}/db/password~true}
       IAM_ROLE: ${ssm:/api/${self:custom.stage}/security/iam-role}
       S3_BUCKET: ${ssm:/api/${self:custom.stage}/storage/name}
+      JWT_TOKEN: ${ssm:/api/${self:custom.stage}/keys/jwt-token}
       S3_URL: ${ssm:/api/${self:custom.stage}/storage/domain}
       S3_BUCKET_SECURED: ${ssm:/api/${self:custom.stage}/storage/secured/name}
       S3_URL_SECURED: ${ssm:/api/${self:custom.stage}/storage/secured/domain}
@@ -132,6 +137,11 @@ functions:
       - http:
           path: /api/${self:custom.version}/users/{userId}
           method: PATCH
+          cors: true
+          private: true
+      - http:
+          path: /api/${self:custom.version}/users/s3/file
+          method: GET
           cors: true
           private: true
   trip:

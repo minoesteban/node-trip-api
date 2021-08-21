@@ -12,6 +12,8 @@ router.put('/:id/files', validator.getSignedUrlPut, user.getSignedUrlPut);
 
 router.get('/:id', validator.getById, user.getById);
 
+router.get('/s3/file', user.getFile);
+
 router.patch('/:id', validator.update, user.update);
 
 module.exports = router;

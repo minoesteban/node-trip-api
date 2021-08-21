@@ -2,10 +2,11 @@ const { sequelize } = require('../models');
 const Place = require('../models').Place;
 const Trip = require('../models').Trip;
 const Rating = require('../models').Rating;
-const AWS = require('aws-sdk');
-const s3 = new AWS.S3({ signatureVersion: 'v4' });
+const { S3 } = require('@aws-sdk/client-s3');
+const s3 = new S3({ signatureVersion: 'v4' });
+const { DynamoDB } = require("@aws-sdk/client-dynamodb");
+const dymamoDB = new DynamoDB({});
 const uuid = require('uuid');
-
 module.exports = {
     create(req, res) {
         return sequelize
@@ -17,7 +18,6 @@ module.exports = {
             })
             .catch((error) => res.status(400).send(error));
     },
-
     delete(req, res) {
         return Trip.destroy({ where: { id: req.params.id } })
             .then((item) => {
@@ -29,7 +29,6 @@ module.exports = {
             })
             .catch((error) => res.status(400).send(error));
     },
-
     update(req, res) {
         return Trip.update(req.body, {
                 where: { id: req.params.id },
@@ -48,7 +47,6 @@ module.exports = {
             })
             .catch((error) => res.status(400).send(error));
     },
-
     getAll(_, res) {
         return Trip.findAll({
                 include: {
@@ -64,7 +62,6 @@ module.exports = {
             })
             .catch((error) => res.status(400).send(error));
     },
-
     getById(req, res) {
         return Trip.findOne({
                 where: { id: req.params.id },
@@ -81,7 +78,6 @@ module.exports = {
             })
             .catch((error) => res.status(400).send(error));
     },
-
     getByOwnerId(req, res) {
         return Trip.findAll({
                 where: { ownerId: req.params.ownerId },
@@ -98,7 +94,6 @@ module.exports = {
             })
             .catch((error) => res.status(400).send(error));
     },
-
     getSignedUrlPut(req, res) {
         let extension = req.query.type.toLowerCase().trim();
         let fileType = extension.replace('jpg', 'jpeg');
@@ -112,14 +107,12 @@ module.exports = {
         process.env.IMAGE_FOLDER
       }/${uuid.v4()}.${extension}`;
         }
-
         if (audio_types.indexOf(extension) > 0) {
             contentType = `audio/${fileType}`;
             key = `trips/${req.params.id}/${
         process.env.AUDIO_FOLDER
       }/${uuid.v4()}.${extension}`;
         }
-
         let params = {
             Bucket: process.env.S3_BUCKET,
             Key: key,
@@ -136,7 +129,6 @@ module.exports = {
             })
             .catch((error) => res.status(400).send(error));
     },
-
     getSignedUrlGet(req, res) {
         let extension = req.query.type.toLowerCase().trim();
         let fileName = req.query.filename;
@@ -146,11 +138,9 @@ module.exports = {
         if (image_types.indexOf(extension) > 0) {
             key = `trips/${req.params.id}/${process.env.IMAGE_FOLDER}/${fileName}.${extension}`;
         }
-
         if (audio_types.indexOf(extension) > 0) {
             key = `trips/${req.params.id}/${process.env.AUDIO_FOLDER}/${fileName}.${extension}`;
         }
-
         let params = {
             Bucket: process.env.S3_BUCKET,
             Key: key,

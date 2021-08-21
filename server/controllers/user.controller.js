@@ -1,10 +1,11 @@
 'use strict';
 const User = require('../models/index').User;
-const AWS = require('aws-sdk');
-const s3 = new AWS.S3({ signatureVersion: 'v4' });
+const { S3 } = require('@aws-sdk/client-s3');
+const s3 = new S3({ signatureVersion: 'v4' });
 const uuid = require('uuid');
 const mailer = require('../utils/send-email');
-
+const jwt = require('jwt-simple');
+const moment = require('moment');
 module.exports = {
     create(req, res) {
         let PIN = Math.floor(Math.random() * 900000) + 100000;
@@ -35,7 +36,6 @@ module.exports = {
                 }
             });
     },
-
     update(req, res) {
         return User.update({
                 firstName: req.body.firstName,
@@ -57,7 +57,6 @@ module.exports = {
                 res.status(500).send({ success: false, message: error });
             });
     },
-
     getById(req, res) {
         return User.findOne({ where: { id: req.params.id, active: true } })
             .then((user) => {
@@ -69,7 +68,6 @@ module.exports = {
                 res.status(500).send({ success: false, message: error });
             });
     },
-
     login(req, res) {
         console.log(req.body);
         return User.scope('withPassword')
@@ -79,7 +77,12 @@ module.exports = {
             .then(async function(user) {
                 if (user) {
                     if (await user.validPassword(req.body.password)) {
-                        if (user.active === true)
+                        if (user.active === true) {
+                            let token = jwt.encode({
+                                id: user.id,
+                                iat: moment().unix(),
+                                exp: moment().add({ days: 30 }).unix()
+                            }, key)
                             res.status(200).send({
                                 success: true,
                                 message: user.id,
@@ -91,7 +94,7 @@ module.exports = {
                                     oi: process.env.ONESIGNAL_APP_ID
                                 }
                             });
-                        else {
+                        } else {
                             mailer
                                 .sendEmail({ email: req.body.username, PIN: user.pin }, 'registered')
                                 .then((result) => {
@@ -111,7 +114,6 @@ module.exports = {
                 res.status(500).send({ success: false, message: error });
             });
     },
-
     activate(req, res) {
         return User.update({
                 active: 1,
@@ -128,7 +130,6 @@ module.exports = {
                 res.status(500).send({ success: false, message: error });
             });
     },
-
     getSignedUrlPut(req, res) {
         let fileType = req.query.type.toLowerCase().trim();
         let params = {
@@ -139,7 +140,6 @@ module.exports = {
             Expires: 60 * 60,
             ContentType: `image/${fileType}`,
         };
-
         s3.getSignedUrlPromise('putObject', params)
             .then((uploadUrl) => {
                 res.status(200).send({
@@ -152,4 +152,17 @@ module.exports = {
                 res.status(500).send({ success: false, message: error });
             });
     },
+    getFile(req, res, next) {
+        s3.getObject({ Bucket: 'trip-api-storage', Key: req.query.key }).on('httpHeaders', (statusCode, headers) => {
+                if (statusCode < 300) {
+                    res.set('Content-Length', headers['content-length']);
+                    res.set('Content-Type', headers['content-type']);
+                    //   res.set('Last-Modified', headers['last-modified']);
+                    res.status(statusCode);
+                }
+            })
+            .createReadStream()
+            .on('error', next)
+            .pipe(res);
+    }
 };
