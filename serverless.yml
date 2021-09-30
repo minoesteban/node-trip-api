@@ -1,6 +1,6 @@
 org: minoesteban1
 app: tripit-api-app
-service: trip-api
+service: tripit-api
 
 plugins:
   - serverless-offline
@@ -8,9 +8,11 @@ plugins:
 
 provider:
   name: aws
-  runtime: nodejs12.x
+  runtime: nodejs14.x
   memorySize: 128
   role: ${self:custom.env.IAM_ROLE}
+  stage: test
+  region: eu-west-1
   apiKeys:
     - test-trip-api
 
